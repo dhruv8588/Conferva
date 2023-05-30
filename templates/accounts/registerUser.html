@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form action="{% url 'registerUser' %}" method="post">
+    {% csrf_token %}
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label>First name</label> {{ form.first_name }}
+      </div>
+      <div class="form-group col-md-6">
+        <label>Last name</label> {{ form.last_name }}
+      </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+          <label>Username</label> {{ form.username }}
+        </div>
+        <div class="form-group col-md-6">
+          <label>Email address</label> {{ form.email }}
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+          <label>Password</label> {{ form.password }}
+        </div>
+        <div class="form-group col-md-6">
+          <label>Confirm Password</label> {{ form.confirm_password }}
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+    <ul class='errorList'>
+        {% for field in form %}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <li style="color: red;">{{ error }}</li>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+
+        {% if form.non_field_errors %}
+            <li style="color: red;">{{ form.non_field_errors }}</li>
+        {% endif %}    
+    </ul>  
+
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            {% include 'includes/alerts.html' %}
+        </div>
+    </div>
+
+  </form>
+{% endblock %}
