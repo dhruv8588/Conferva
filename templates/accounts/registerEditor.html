@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <form action="{% url 'registerUser' %}" method="post">
+  <form action="{% url 'registerEditor' %}" method="post">
     {% csrf_token %}
     <div class="form-row">
       <div class="form-group col-md-6">
@@ -27,7 +27,6 @@
           <label>Confirm Password</label> {{ form.confirm_password }}
         </div>
     </div>
-    
     <button type="submit" class="btn btn-primary">Submit</button>
 
     <ul class='errorList'>
@@ -38,10 +37,10 @@
                 {% endfor %}
             {% endif %}
         {% endfor %}
-        
+
         {% if form.non_field_errors %}
-          <li style="color: red;">{{ form.non_field_errors }}</li>
-        {% endif %}  
+            <li style="color: red;">{{ form.non_field_errors }}</li>
+        {% endif %}    
     </ul>  
 
     <div class="row">
@@ -49,5 +48,6 @@
             {% include 'includes/alerts.html' %}
         </div>
     </div>
+
   </form>
 {% endblock %}

@@ -1,0 +1,11 @@
+{% autoescape off %}
+
+Hi {{ user.first_name }},
+
+{% if is_approved %}
+    Congratulations! You request has been approved for organizing a conference.
+{% else %}
+    We're sorry! You are not eligible for organizing a conference.
+{% endif %}
+
+{% endautoescape %}
