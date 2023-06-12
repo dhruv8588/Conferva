@@ -39,18 +39,10 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
-    EDITOR = 1
-    AUTHOR = 2
-    
-    ROLE_CHOICE = (
-        (EDITOR, 'Editor'),
-        (AUTHOR, 'Author'),
-    )
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(max_length=100, unique=True)
-    role = models.PositiveSmallIntegerField(choices=ROLE_CHOICE, blank=True, null=True)
 
     # required fields
     date_joined = models.DateTimeField(auto_now_add=True)
@@ -78,10 +70,10 @@ class User(AbstractBaseUser):
     
     def get_role(self):
         user_role = ""
-        if self.role==1:
-            user_role = 'Editor'
-        elif self.role==2:
-            user_role = 'Author'
+        if self.is_admin==True:
+            user_role = 'Admin'
+        elif self.is_admin==False:
+            user_role = 'Guest'
         return user_role     
 
 class UserProfile(models.Model):

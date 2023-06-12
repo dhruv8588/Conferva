@@ -19,3 +19,24 @@
     font-size: 12px;
     cursor: pointer;
 }
+
+/* Notification button */
+
+#btn-nav {
+    float: right;
+    margin-right: 45px;
+    font-size: 20px;
+}
+
+.not_approved {
+    position: absolute;
+    border-radius: 50%;
+    font-size: 13px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    margin-top: -32px;
+    margin-left: 10px;
+    background-color: rgb(194, 163, 184);
+}

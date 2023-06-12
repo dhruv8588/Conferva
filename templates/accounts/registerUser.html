@@ -7,6 +7,8 @@
       <div class="form-group col-md-6">
         <label>First name</label> {{ form.first_name }}
       </div>
+      {% comment %} <input type="text" name= "first_name" placeholder="Enter your first name" value="{{ form.first_name.value }}"> {% endcomment %}
+
       <div class="form-group col-md-6">
         <label>Last name</label> {{ form.last_name }}
       </div>
@@ -39,9 +41,9 @@
             {% endif %}
         {% endfor %}
         
-        {% if form.non_field_errors %}
-          <li style="color: red;">{{ form.non_field_errors }}</li>
-        {% endif %}  
+        {% for error in non_field_errors %}
+          <li style="color: red;">{{ error }}</li>
+        {% endfor %}  
     </ul>  
 
     <div class="row">

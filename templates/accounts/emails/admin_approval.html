@@ -2,10 +2,10 @@
 
 Hi {{ user.first_name }},
 
-{% if is_approved %}
-    Congratulations! You request has been approved for organizing a conference.
+{% if conference.is_approved %}
+    Congratulations! Your request for conference creation- {{ conference.name }}({{ conference.acronym }}) has been approved.
 {% else %}
-    We're sorry! You are not eligible for organizing a conference.
+    We're sorry! Your request for conference creation- {{ conference.name }}({{ conference.acronym }}) has been rejected. For more details, please contact support@conferva.com.
 {% endif %}
 
 {% endautoescape %}

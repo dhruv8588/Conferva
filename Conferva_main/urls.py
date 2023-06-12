@@ -19,9 +19,12 @@ from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 
+from django.views.i18n import JavaScriptCatalog
+
 from . import views
 
 urlpatterns = [
+    path('jsi18n', JavaScriptCatalog.as_view(), name='js-catlog'),
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('', include('accounts.urls')),

@@ -1,25 +1,25 @@
 from django.utils.http import urlsafe_base64_decode
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages, auth
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 
-from editor.forms import EditorForm
+from conference.models import Conference
 
 from .utils import detectUser, send_verification_email
 
 from .models import User, UserProfile
 from .forms import UserForm
 
-def check_role_editor(user):
-    if user.role == 1:
+def check_role_admin(user):
+    if user.is_admin:
         return True
     else:
         raise PermissionDenied
 
-def check_role_author(user):
-    if user.role == 2:
+def check_role_guest(user):
+    if not user.is_admin:
         return True
     else:
         raise PermissionDenied    
@@ -37,7 +37,6 @@ def registerUser(request):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
             user = User.objects.create_user(first_name=first_name, last_name=last_name, username=username, email=email, password=password)
-            user.role = User.AUTHOR
             user.save()
             
             mail_subject = 'Please activate your account'
@@ -50,6 +49,7 @@ def registerUser(request):
         form = UserForm()
     context = {
         'form': form,
+        'non_field_errors': form.non_field_errors(),
     }
     return render(request, 'accounts/registerUser.html', context)
 
@@ -68,45 +68,6 @@ def activate(request, uidb64, token):
     else:
         messages.error(request, 'Invalid activation link')    
         return redirect('myAccount')
-
-
-def registerEditor(request):
-    if request.user.is_authenticated:
-        messages.warning(request, 'You are already logged in!')
-        return redirect('myAccount')
-    elif request.method=='POST':
-        form = UserForm(request.POST)
-        e_form = EditorForm(request.POST)
-        if form.is_valid() and e_form.is_valid():
-            first_name = form.cleaned_data['first_name']
-            last_name = form.cleaned_data['last_name']
-            username = form.cleaned_data['username']
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
-            user = User.objects.create_user(first_name=first_name, last_name=last_name, username=username, email=email, password=password)
-            user.role = User.EDITOR
-            user.save()
-
-            mail_subject = 'Please activate your account'
-            email_template = 'accounts/emails/account_verification.html'
-            send_verification_email(request, user, mail_subject, email_template)
-
-            editor = e_form.save(commit=False)
-            editor.user = user
-            user_profile = UserProfile.objects.get(user=user)
-            editor.user_profile = user_profile
-            editor.save()
-            messages.success(request, 'Your account has been registered sucessfully! Please wait for the approval.')
-    else:
-        form = UserForm()
-        e_form = EditorForm()
-
-    context = {
-        'form': form,
-        'e_form': e_form, 
-    }    
-
-    return render(request, 'accounts/registerEditor.html', context)
 
 def login(request):
     if request.user.is_authenticated:
@@ -140,14 +101,19 @@ def myAccount(request):
     return redirect(redirectUrl)
 
 @login_required(login_url='login')
-@user_passes_test(check_role_author)
-def authorDashboard(request):
-    return render(request, 'accounts/authorDashboard.html')
+@user_passes_test(check_role_guest)
+def guestDashboard(request):
+    # count = Conference.objects.filter(is_approved=True)
+    conferences = Conference.objects.all()
+    context = {
+        "conferences": conferences
+    }
+    return render(request, 'accounts/guestDashboard.html', context)
 
 @login_required(login_url='login')
-@user_passes_test(check_role_editor)
-def editorDashboard(request):
-    return render(request, 'accounts/editorDashboard.html')
+@user_passes_test(check_role_admin)
+def adminDashboard(request):
+    return render(request, 'accounts/adminDashboard.html')
 
 def forgot_password(request):
     if request.method=='POST':

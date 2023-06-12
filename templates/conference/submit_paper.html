@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  {% include 'includes/alerts.html' %}
+
+    <form action="{% url 'submit_paper' conference.id %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}    
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label>Title</label> {{ form.title }}
+          </div>
+        </div>
+        <div class="form-row">    
+          <div class="form-group col-md-6">
+            <label>Abstract</label> {{ form.abstract }}
+          </div>
+        </div>
+        {% if author %}
+          <p>Author: {{ author.first_name }} {{ author.last_name }}</p>
+        {% endif %}
+          <a href="{% url 'add_author' conference.id %}">Add Author</a>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+              <label>File</label>
+              {{ form.file }}
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button> 
+
+        <ul class='errorList'>
+          {% for field in form %}
+              {% if field.errors %}
+                  {% for error in field.errors %}
+                      <li style="color: red;">{{ error }}</li>
+                  {% endfor %}
+              {% endif %}
+          {% endfor %}
+        </ul>
+        <li style="color: red;">{{ form.non_field_errors }}</li>
+    </form>    
+
+{% endblock %}

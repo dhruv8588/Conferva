@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            {% include 'includes/alerts.html' %}
+        </div>
+    </div>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Acronym</th>
+            <th scope="col">Research area</th>
+            <th scope="col">Where</th>
+            <th scope="col">Start date</th>
+            <th scope="col">End date</th>
+            <th scope="col">Submission Deadline</th>
+            <th scope="col">Link to submit</th>    
+        </tr>
+        </thead>
+        <tbody>
+            {% for conference in conferences %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ conference.name }}</td>
+                    <td>{{ conference.acronym }}</td>
+                    <td>{{ conference.research_area }}</td>
+                    <td>{{ conference.venue }}, {{ conference.city }}, {{ conference.country }}</td>
+                    <td>{{ conference.start_date }}</td>
+                    <td>{{ conference.end_date }}</td>
+                    <td>{{ conference.submission_deadline }}</td>
+                    <td>
+                        {% if conference.submission_deadline >= today  %}
+                            <a href="{% url 'submit_paper' conference.id %}">Submit</a>
+                        {% endif %}    
+                    </td>
+                </tr>
+            {% endfor %}    
+        </tbody>
+    </table>
+
+{% endblock %}
