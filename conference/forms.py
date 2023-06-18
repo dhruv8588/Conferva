@@ -44,10 +44,12 @@ class ConferenceForm(forms.ModelForm):
 
 class PaperForm(forms.ModelForm):
     # file = forms.FileField(widget=forms.FileInput(attrs={'class': 'btn btn-info'}), validators=[allow_only_pdf_or_docx_validator])
+    is_submitter_author = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
     class Meta:
         model = Paper
-        fields = ['title', 'abstract', 'file'] 
+        fields = ['title', 'abstract', 'file', 'is_submitter_author'] 
         # fields = ['title', 'abstract', 'authors', 'file']  
+  
 
 ConferenceModelFormset = modelformset_factory(
     Conference,

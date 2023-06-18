@@ -1,13 +1,11 @@
 from datetime import date
 import hashlib
-import re
 from django.forms import formset_factory, inlineformset_factory
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.template.defaultfilters import slugify
-from django.db import models
-from django.db.models import Q, Func, Value
+from django.db.models import Q
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
@@ -62,149 +60,273 @@ def conference_listing(request):
     }
     return render(request, 'conference/conference_listing.html', context)
 
+# for submit paper
+def delete_author(request, conference_id, paper_id, author_id):
+    paper = get_object_or_404(Paper, id=paper_id)
+    paper.authors.remove(author_id)
 
-# def add_author(request, conference_id):
-#     if request.method == 'POST':
-#         form = AuthorForm(request.POST)
-#         if form.is_valid():
-#             author = form.save()
-#             return redirect('submit_paper', conference_id=conference_id, author_id=author.id)
-#         else:
-#             print(form.errors) 
-#     else:
-#         form = AuthorForm()
+    author = get_object_or_404(Author, id=author_id)
 
-#     context = {
-#         "form": form,
-#         "conference_id" : conference_id,
-#     }               
-#     return render(request, 'conference/add_author.html', context)
+    papers = Paper.objects.all()
+    for paper in papers:
+        if author in paper.authors.all():
+            return redirect('submit_paper', conference_id, paper_id)
 
-
-# @login_required(login_url='login')
-# def submit_paper(request, conference_id, author_id=None):
-#     conference = get_object_or_404(Conference, id=conference_id)
-#     author = get_object_or_404(Author, id=author_id) if author_id else None
-#     if request.method == 'POST':
-#         form = PaperForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             # check whether the user who is submitting the paper in this conference has not submitted any other paper in this same conference
-#             # if no then 
-#             # if request.user not in conference.submitters:
-#             conference.submitters.add(request.user.id)
-#             print(conference.submitters)
-
-#             title = form.cleaned_data['title']
-#             abstract = form.cleaned_data['abstract']
-#             file = request.FILES['file']
-#             file_hash = hashlib .md5(file.read()).hexdigest()
-               
-#             # papers = Paper.objects.all()
-#             # for paper in papers:
-#             #     if paper.title.replace(" ", "").lower() == title.replace(" ", "").lower() and paper.abstract.replace(" ", "").lower() == abstract.replace(" ", "").lower() and paper.file_hash == file_hash:
-#             #         if not paper.conferences.filter(id=conference_id):
-#             #             paper.conferences.add(conference_id)
-#             #             messages.success(request, 'Paper submitted successfully!')
-#             #             return redirect('myAccount')
-
-#             # papers_with_same_file = Paper.objects.filter(
-#             #     Q(file_hash=file_hash)
-#             # )
-#             # if papers_with_same_file:
-#             #     for paper in papers_with_same_file:
-#             #         if paper.conferences.filter(id=conference_id):
-#             #             messages.error(request, 'This paper has already been submitted to this conference!')
-#             #             return redirect('submit_paper', conference_id)
-                            
-#             # papers = Paper.objects.all()
-#             # for paper in papers:
-#             #     if paper.title.replace(" ", "").lower() == title.replace(" ", "").lower():
-#             #         if paper.conferences.filter(id=conference_id):
-#             #             messages.error(request, 'A paper with the same title has already been submitted to this conference!')
-#             #             return redirect('submit_paper', conference_id)
-                    
-#             paper = form.save(commit=False)
-#             paper.submitter = request.user
-#             paper.file_hash = file_hash
-#             paper.save()
-#             paper.conferences.add(conference_id)
-
-#             # add_author(request, conference_id)
-#             # paper.authors.add()
-#             if author:
-#                 paper.authors.add(author)
-
-#             paper.save()
-#             messages.success(request, 'Paper submitted successfully!')
-#             return redirect('myAccount')
-#         else:
-#             print(form.errors)
-#     else:
-#         form = PaperForm()
+    author = get_object_or_404(Author, id=author_id)
+    author.delete()
+    return redirect('submit_paper', conference_id, paper_id)   
     
-#     context = {
-#         "form": form,
-#         "conference": conference,
-#         "author": author,
-#     }
-#     return render(request, 'conference/submit_paper.html', context)
 
-def add_author(request, conference_id):
+def edit_author(request, conference_id, paper_id, author_id):
+    paper = get_object_or_404(Paper, id=paper_id)
+    form = PaperForm(instance=paper)
+    display_edit_author_model = True
+
+    author = get_object_or_404(Author, id=author_id)
     if request.method == 'POST':
-        form = AuthorForm(request.POST)
-        if form.is_valid():
-            author = form.save()
-            return redirect('submit_paper', conference_id=conference_id, author_id=author.id, title=request.POST.get('title'), abstract=request.POST.get('abstract'))
+        aform = AuthorForm(request.POST, instance=author)
+        if aform.is_valid():
+            # code starts here
+            entered_email = author.email.lower()
+            orig = Author.objects.get(id=author_id)
+            if entered_email != orig.email:
+                flag = 0
+                other_authors = Author.objects.exclude(id=orig.id)
+                for other_author in other_authors:
+                    if other_author.email == entered_email:
+                        paper.authors.add(other_author.id)
+                        other_author.first_name = author.first_name #
+                        other_author.last_name = author.last_name #
+                        other_author.save() #
+                        paper.authors.remove(orig.id)
+                        flag = 1
+                if flag==1:
+                    delete_orig = True
+                    other_papers = Paper.objects.exclude(id=paper_id)
+                    for other_paper in other_papers:
+                        if orig in other_paper.authors.all():
+                            delete_orig = False
+                            return redirect('submit_paper', conference_id, paper_id)
+                    if delete_orig == True:
+                        orig.delete()
+                        return redirect('submit_paper', conference_id, paper_id)        
+                elif flag == 0:
+                    flag2 = 0
+                    other_papers = Paper.objects.exclude(id=paper_id)
+                    for other_paper in other_papers:
+                        if orig in other_paper.authors.all():
+                            paper.authors.remove(orig.id)
+                            # create a new author object with a different id and the field values of author object
+                            new_author = Author.objects.create(
+                                first_name = author.first_name,
+                                last_name = author.last_name,
+                                email = author.email
+                            )
+                            users = User.objects.all()
+                            for user in users:
+                                if user.email == new_author.email:
+                                    new_author.user = user
+                                    break
+                            new_author.save()
+                            paper.authors.add(new_author.id)
+                            flag2 = 1
+                    if flag2 == 0:
+                        author.save()
+                    return redirect('submit_paper', conference_id, paper_id)           
+            else:
+                orig.first_name = author.first_name #
+                orig.last_name = author.last_name #
+                orig.save() #
+                return redirect('submit_paper', conference_id, paper_id)
         else:
-            print(form.errors)
+            print(aform.errors)
     else:
-        form = AuthorForm()
+        aform = AuthorForm(instance=author)
 
+    context = {
+        "aform": aform,
+        "display_edit_author_model": display_edit_author_model,
+        "form": form,
+        "conference_id": conference_id,
+        "paper": paper,
+        "author_id": author_id,
+    }
+    return render(request, 'conference/submit_paper.html', context)         
+
+def add_author(request, conference_id, paper_id):
+    paper = get_object_or_404(Paper, id=paper_id)
+    form = PaperForm(instance=paper)
+    display_add_author_model = True 
+    if request.method == 'POST':
+        aform = AuthorForm(request.POST)
+        if aform.is_valid(): 
+            email = aform.cleaned_data['email'].lower()
+            authors = Author.objects.all()
+            for author in authors:
+                if author.email == email:
+                    paper.authors.add(author.id)
+                    author.first_name = aform.cleaned_data['first_name'] #
+                    author.last_name = aform.cleaned_data['last_name'] #
+                    author.save() #
+                    # paper.save()
+                    return redirect('submit_paper', conference_id, paper_id)
+                
+            author = aform.save(commit=False)
+            users = User.objects.all()
+            for user in users:
+                if user.email == email:
+                    author.user = user
+                    break
+            author.email = email
+            aform.save()
+
+            paper.authors.add(author.id)
+            # paper.save()
+
+            return redirect('submit_paper', conference_id, paper_id)
+        else:
+            print(aform.errors)
+    else:
+        aform = AuthorForm()
+              
+    context = {
+        "aform": aform,
+        "display_add_author_model": display_add_author_model,
+        "form": form,
+        "conference_id": conference_id,
+        "paper": paper,
+    }
+    return render(request, 'conference/submit_paper.html', context)
+
+@login_required(login_url='login')
+def submit_paper(request, conference_id, paper_id=None):
+    paper = get_object_or_404(Paper, id=paper_id) if paper_id else None
+
+    if request.method == 'POST':
+        form = PaperForm(request.POST, request.FILES, instance=paper)
+        paper = form.save()   
+        if form.is_valid():
+            is_submitter_author = form.cleaned_data['is_submitter_author']
+            if is_submitter_author == True:
+                authors = Author.objects.all()
+                flag = 0
+                for author in authors:
+                    if author.user == request.user:
+                        paper.authors.add(author.id)
+                        flag = 1
+                        break 
+                if flag==0:    
+                    new_author = Author.objects.create(
+                                        first_name = request.user.first_name,
+                                        last_name = request.user.last_name,
+                                        email = request.user.email,
+                                        user = request.user,
+                                    )
+                    new_author.save()
+                    paper.authors.add(new_author.id) 
+            else:
+                authors = Author.objects.all()
+                for author in authors:
+                    if author.user == request.user:
+                        if author in paper.authors.all():
+                            paper.authors.remove(author.id)
+                            break
+
+        
+            if 'add_author' in request.POST:
+                return redirect('add_author', conference_id, paper.id)
+            elif 'submit_paper' in request.POST:
+                file_hash = hashlib.md5(paper.file.read()).hexdigest() if paper.file else None
+                title = paper.title
+                abstract = paper.abstract
+                authors = paper.authors.all()
+                paper.file_hash = file_hash
+
+                submitted_papers_with_same_file = Paper.objects.filter(Q(file_hash=file_hash) & ~Q(id=paper.id))
+                if submitted_papers_with_same_file:
+                    for submitted_paper in submitted_papers_with_same_file:
+                        if submitted_paper.conferences.filter(id=conference_id):
+                            messages.error(request, 'This paper has already been submitted to this conference!')
+                            return redirect('submit_paper', conference_id, paper.id)
+                
+                conference = get_object_or_404(Conference, id=conference_id)
+                conference.submitters.add(request.user.id)
+
+                submitted_papers = Paper.objects.exclude(id=paper_id) 
+                for submitted_paper in submitted_papers:
+                    if submitted_paper.title.replace(" ", "").lower() == title.replace(" ", "").lower() and submitted_paper.abstract.replace(" ", "").lower() == abstract.replace(" ", "").lower() and set(submitted_paper.authors.all()) == set(authors) and submitted_paper.file_hash == file_hash:
+                        if not submitted_paper.conferences.filter(id=conference_id):
+                            submitted_paper.submitters.add(request.user.id)
+                            submitted_paper.conferences.add(conference_id)
+                            paper.delete()
+                            messages.success(request, 'Paper submitted successfully!')
+                            return redirect('myAccount')
+                
+                paper.submitters.add(request.user.id)
+                paper.conferences.add(conference_id)
+                paper.save() 
+                messages.success(request, 'Paper submitted successfully!')
+                return redirect('myAccount')
+        else:
+            print(form.errors)         
+    else:
+        form = PaperForm(instance=paper)
     context = {
         "form": form,
         "conference_id": conference_id,
-    }
-    return render(request, 'conference/add_author.html', context)
-
-
-def submit_paper(request, conference_id, author_id=None):
-    conference = get_object_or_404(Conference, id=conference_id)
-    author = get_object_or_404(Author, id=author_id) if author_id else None
-    if request.method == 'POST':
-        form = PaperForm(request.POST, request.FILES)
-        if form.is_valid():
-            conference.submitters.add(request.user.id)
-
-            file = request.FILES['file']
-            file_hash = hashlib.md5(file.read()).hexdigest()
-
-            paper = form.save(commit=False)
-            paper.submitter = request.user
-            paper.file_hash = file_hash
-            paper.save()
-            paper.conferences.add(conference_id)
-
-            if author:
-                paper.authors.add(author)
-
-            paper.save()
-            messages.success(request, 'Paper submitted successfully!')
-            return redirect('myAccount')
-        else:
-            print(form.errors)
-    else:
-        title = request.GET.get('title')
-        abstract = request.GET.get('abstract')
-        form = PaperForm(initial={'title': title, 'abstract': abstract})
-
-    context = {
-        "form": form,
-        "conference": conference,
-        "author": author,
-        "title": title,
-        "abstract": abstract,
+        "paper": paper,
     }
     return render(request, 'conference/submit_paper.html', context)
+
+
+def withdraw_paper(request, conference_id, paper_id):
+    paper = get_object_or_404(Paper, id=paper_id)
+    conferences = Conference.objects.exclude(id=conference_id)
+    flag = 0
+    for conference in conferences:
+        if conference in paper.conferences.all():
+            flag = 1
+            break
+    if flag == 0:
+        authors = paper.authors.all()
+        paper.delete()
+        papers = Paper.objects.all()
+        flag2 = 0
+        for author in authors:
+            if author in paper.authors.all():
+                flag2 = 1
+                break;
+        if flag2==0:
+            author.delete()
+    else:
+        paper.conferences.remove(conference_id)
+    
+        # submitters = paper.submitters.all()
+        # for submitter in submitters:
+        #     if submitter == request.user:
+        #         break
+
+        s = paper.submitters.get(request.user.id)
+        print(s)
+        flag3 = 0
+        for submitter in paper.submitters:
+            for conference in paper.conferences:  # .exclude(id=conference_id):
+                if submitter in conference.submitters:
+                    if submitter == s:
+                        flag3 = 1
+        if flag3 == 0:
+            paper.submitters.remove(request.user.id)
+
+        flag4 = 0
+        papers = Paper.objects.exclude(id=paper_id)
+        for paper in papers:
+            if conference in paper.conferences.all():
+                if request.user in paper.submitters:
+                    flag4 = 1
+        if flag4 == 0:
+            conference.submitters.remove(request.user.id)
+
+        return redirect('myAccount')
 
 
 @login_required(login_url='login')

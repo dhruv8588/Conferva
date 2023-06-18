@@ -5,7 +5,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 
-from conference.models import Conference
+from conference.models import Conference, Paper
 
 from .utils import detectUser, send_verification_email
 
@@ -34,7 +34,7 @@ def registerUser(request):
             first_name = form.cleaned_data['first_name']
             last_name = form.cleaned_data['last_name']
             username = form.cleaned_data['username']
-            email = form.cleaned_data['email']
+            email = form.cleaned_data['email'].lower()
             password = form.cleaned_data['password']
             user = User.objects.create_user(first_name=first_name, last_name=last_name, username=username, email=email, password=password)
             user.save()
@@ -103,10 +103,12 @@ def myAccount(request):
 @login_required(login_url='login')
 @user_passes_test(check_role_guest)
 def guestDashboard(request):
-    # count = Conference.objects.filter(is_approved=True)
-    conferences = Conference.objects.all()
+    conferences = Conference.objects.filter(creator=request.user)
+    papers = Paper.objects.filter(submitters=request.user)
+
     context = {
-        "conferences": conferences
+        "conferences": conferences,
+        "papers": papers
     }
     return render(request, 'accounts/guestDashboard.html', context)
 

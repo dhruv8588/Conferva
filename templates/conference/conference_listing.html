@@ -6,9 +6,13 @@
             {% include 'includes/alerts.html' %}
         </div>
     </div>
-    <table class="table">
+    <div class="input-group input-group-sm mb-3 mt-2">
+        <input type="text" onkeyup="searchFunction()" class="form-control" id="search" placeholder="Search for...">
+        <a href="{% url 'conference_listing' %}" class="btn btn-dark"><i class="fas fa-sync-alt"></i></a>
+        {% comment %} <button type="reset" class="btn btn-outline-dark mb-3 ms-2" style="width: 50px;"><i class="fas fa-sync-alt"></i></button> {% endcomment %}
+    <table class="table" id="myTable">
         <thead>
-        <tr>
+        <tr id="chk-th">
             <th scope="col">#</th>
             <th scope="col">Name</th>
             <th scope="col">Acronym</th>
@@ -41,4 +45,52 @@
         </tbody>
     </table>
 
+    <span class="text-danger" id="no-data"></span>
+
+    <script>
+        function searchFunction() {
+            let input, filter, table, tr, td, j;
+            input = document.getElementById("search");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("myTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (j=0; j<tr.length; j++) {
+                td = tr[j].getElementsByTagName("td");
+                msg = document.getElementById("no-data");
+
+                if (td.length > 0) {
+                    if (td[0].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+                    td[1].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+                    td[2].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+                    td[3].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+                    td[4].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+                    td[5].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+                    td[6].innerHTML.toLocaleUpperCase().indexOf(filter) > -1) {
+                        tr[j].style.display = "";
+                        msg.innerHTML = "";
+                    }
+                    else {
+                        tr[j].style.display = "none";
+                    }
+                }
+                if (td.length == 0) {
+                    msg.innerHTML = "Conference not found"
+                }
+            }
+        }
+    </script>    
+
+    <style>
+        #no-data {
+            width: 80%;
+            position: absolute;
+            top: 150%;
+            left: 50%;
+            margin-right: -50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-size: 25px;
+        }
+    </style>    
 {% endblock %}

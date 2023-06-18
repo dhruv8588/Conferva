@@ -16,8 +16,8 @@ class Conference(models.Model):
         ('Engineering', 'Engineering'),
     )
     APPROVAL_CHOICES = (
-        (True, 'True'),
-        (False, 'False'),
+        (True, 'Approved'),
+        (False, 'Not Approved'),
     )
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="creator")
     submitters = models.ManyToManyField(User, blank=True)
@@ -65,7 +65,7 @@ class Author(models.Model):
     user = OneToOneField(User, on_delete=models.SET_NULL, blank=True, null=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    email = models.EmailField(max_length=100, unique=True)
+    email = models.EmailField(max_length=100)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -74,19 +74,23 @@ class Author(models.Model):
         return self.first_name + " " + self.last_name
 
 class Paper(models.Model):
-    submitter = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
+    submitters = models.ManyToManyField(User, blank=True)
     conferences = models.ManyToManyField(Conference, blank=True)
     title = models.CharField(max_length=200)
     abstract = models.TextField(max_length=300)
     authors = models.ManyToManyField(Author, blank=True)
-    file = models.FileField(upload_to='conference/papers')
-    file_hash = models.CharField(max_length=32, blank=True)
+    file = models.FileField(upload_to='conference/papers', blank=True, null=True)
+    file_hash = models.CharField(max_length=32, blank=True, null=True)
+    is_submitter_author = models.BooleanField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # def written_by(self):
-    #     return ", ".join([str(i) for i in self.authors.all()])
+    def written_by(self):
+        return ", ".join([str(i) for i in self.authors.all()])
+    
+    def submitted_by(self):
+        return ", ".join([str(i) for i in self.submitters.all()])
 
     # def calculate_file_hash(self):
     #     import hashlib
