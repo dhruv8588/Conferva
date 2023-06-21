@@ -1,0 +1,23 @@
+{% extends 'conference/submit_paper.html' %}
+
+{% block action-btn-text %}
+    Save Changes
+{% endblock %}  
+
+{% block back-btn-link %}"{% url 'myAccount' %}"{% endblock %}
+
+{% block action %}  
+    <form action="{% url 'edit_paper' conference_id paper.id %}" method="post" enctype="multipart/form-data">
+{% endblock %}
+
+{% block add-author-btn-name %}"edit_paper_add_author"{% endblock %}
+
+{% block add_author_modal %}
+    {% include 'conference/edit_paper_add_author.html' %}
+{% endblock %}  
+
+{% block edit_author_modal %}
+        {% include 'conference/edit_paper_edit_author.html' %}
+{% endblock edit_author_modal %}  
+
+{% block delete-author-link %}"{% url 'edit_paper_delete_author' conference_id paper.id author.id %}"{% endblock %}

@@ -103,12 +103,11 @@ def myAccount(request):
 @login_required(login_url='login')
 @user_passes_test(check_role_guest)
 def guestDashboard(request):
+    papers = Paper.objects.filter(submitter=request.user)
     conferences = Conference.objects.filter(creator=request.user)
-    papers = Paper.objects.filter(submitters=request.user)
-
     context = {
+        "papers": papers,
         "conferences": conferences,
-        "papers": papers
     }
     return render(request, 'accounts/guestDashboard.html', context)
 

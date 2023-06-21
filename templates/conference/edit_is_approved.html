@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-
 {% block content %}
 
 <form action="{% url 'edit_is_approved' %}" method="post">
@@ -34,15 +33,14 @@
                     <input type="hidden" name="{{ form.prefix }}-start_date" value="{{ form.instance.start_date }}">
                     <input type="hidden" name="{{ form.prefix }}-end_date" value="{{ form.instance.end_date }}">
                     <input type="hidden" name="{{ form.prefix }}-submission_deadline" value="{{ form.instance.submission_deadline }}">
-                    
-
+        
                     <td>{{ form.name.value }}</td>
                     <td>{{ form.acronym.value }}</td>
                     <td>{{ form.research_area.value }}</td>
                     <td>{{ form.venue.value }}, {{ form.city.value }}, {{ form.country.value }}</td>
-                    <td>{{ form.start_date.value }}</td>
-                    <td>{{ form.end_date.value }}</td>
-                    <td>{{ form.submission_deadline.value }}</td>
+                    <td>{{ form.start_date.value|date:"F d, Y" }}</td>
+                    <td>{{ form.end_date.value|date:"F d, Y" }}</td>
+                    <td>{{ form.submission_deadline.value|date:"F d, Y" }}</td>
                     <td>
                         {{ form.is_approved }}
                     </td>

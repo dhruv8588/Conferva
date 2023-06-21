@@ -19,8 +19,7 @@ class Conference(models.Model):
         (True, 'Approved'),
         (False, 'Not Approved'),
     )
-    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="creator")
-    submitters = models.ManyToManyField(User, blank=True)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=200, unique=True)
     acronym = models.CharField(max_length=100, unique=True)
     research_area = models.CharField(max_length=200, choices=RESEARCH_AREA_CHOICES)
@@ -74,8 +73,8 @@ class Author(models.Model):
         return self.first_name + " " + self.last_name
 
 class Paper(models.Model):
-    submitters = models.ManyToManyField(User, blank=True)
-    conferences = models.ManyToManyField(Conference, blank=True)
+    submitter = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
+    conference = models.ForeignKey(Conference, on_delete=models.SET_NULL, blank=True, null=True)
     title = models.CharField(max_length=200)
     abstract = models.TextField(max_length=300)
     authors = models.ManyToManyField(Author, blank=True)
@@ -89,9 +88,6 @@ class Paper(models.Model):
     def written_by(self):
         return ", ".join([str(i) for i in self.authors.all()])
     
-    def submitted_by(self):
-        return ", ".join([str(i) for i in self.submitters.all()])
-
     # def calculate_file_hash(self):
     #     import hashlib
 
@@ -109,10 +105,6 @@ class Paper(models.Model):
     #     # Calculate and set the file_hash value before saving the model
     #     self.file_hash = self.calculate_file_hash()
     #     super().save(*args, **kwargs)
-
-    
-    def submitted_in(self):
-        return ", ".join([str(i) for i in self.conferences.all()])
 
     def __str__(self):
         return self.title

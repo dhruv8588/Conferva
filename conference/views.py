@@ -1,4 +1,5 @@
 from datetime import date
+from datetime import datetime
 import hashlib
 from django.forms import formset_factory, inlineformset_factory
 from django.shortcuts import get_object_or_404, redirect, render
@@ -10,10 +11,13 @@ from django.urls import reverse
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import PermissionDenied
+from django.urls import resolve
+from django.utils.dateformat import DateFormat
+from django.core.paginator import Paginator
 
 from accounts.models import User
 from conference.models import Author, Conference, Paper
-from .utils import send_approval_request_email
+# from .utils import send_approval_request_email
 
 from .forms import AuthorForm, ConferenceForm, ConferenceModelFormset, PaperForm
 from conference import forms
@@ -39,7 +43,7 @@ def create_conference(request):
 
             mail_subject = 'Request for conference approval'
             email_template = 'accounts/emails/approval_request.html'
-            send_approval_request_email(request, mail_subject, email_template)
+            # send_approval_request_email(request, mail_subject, email_template)
 
             messages.success(request, 'Your conference has been registered sucessfully! Please wait for the approval.')
             return redirect('myAccount')
@@ -54,14 +58,25 @@ def create_conference(request):
 def conference_listing(request):
     conferences = Conference.objects.filter(is_approved=True).order_by('created_at')
     today = date.today()
+
+    # paginator = Paginator(conferences, 2)
+    # page_number = request.GET.get('page')
+    # page_obj = paginator.get_page(page_number)
+
     context = {
         "conferences": conferences,
         "today": today,
+        # "page_obj": page_obj,
     }
     return render(request, 'conference/conference_listing.html', context)
 
-# for submit paper
 def delete_author(request, conference_id, paper_id, author_id):
+    url_name = resolve(request.path_info).url_name
+    if url_name == 'delete_author':
+        x = redirect('submit_paper', conference_id, paper_id)
+    elif url_name == 'edit_paper_delete_author':
+        x = redirect('edit_paper', conference_id, paper_id)
+
     paper = get_object_or_404(Paper, id=paper_id)
     paper.authors.remove(author_id)
 
@@ -70,14 +85,20 @@ def delete_author(request, conference_id, paper_id, author_id):
     papers = Paper.objects.all()
     for paper in papers:
         if author in paper.authors.all():
-            return redirect('submit_paper', conference_id, paper_id)
+            return x
 
     author = get_object_or_404(Author, id=author_id)
     author.delete()
-    return redirect('submit_paper', conference_id, paper_id)   
+    return x
     
 
 def edit_author(request, conference_id, paper_id, author_id):
+    url_name = resolve(request.path_info).url_name
+    if url_name == 'edit_author':
+        x = redirect('submit_paper', conference_id, paper_id)
+    elif url_name == 'edit_paper_edit_author':
+        x = redirect('edit_paper', conference_id, paper_id)
+
     paper = get_object_or_404(Paper, id=paper_id)
     form = PaperForm(instance=paper)
     display_edit_author_model = True
@@ -106,10 +127,10 @@ def edit_author(request, conference_id, paper_id, author_id):
                     for other_paper in other_papers:
                         if orig in other_paper.authors.all():
                             delete_orig = False
-                            return redirect('submit_paper', conference_id, paper_id)
+                            return x
                     if delete_orig == True:
                         orig.delete()
-                        return redirect('submit_paper', conference_id, paper_id)        
+                        return x     
                 elif flag == 0:
                     flag2 = 0
                     other_papers = Paper.objects.exclude(id=paper_id)
@@ -132,12 +153,12 @@ def edit_author(request, conference_id, paper_id, author_id):
                             flag2 = 1
                     if flag2 == 0:
                         author.save()
-                    return redirect('submit_paper', conference_id, paper_id)           
+                    return x          
             else:
                 orig.first_name = author.first_name #
                 orig.last_name = author.last_name #
                 orig.save() #
-                return redirect('submit_paper', conference_id, paper_id)
+                return x
         else:
             print(aform.errors)
     else:
@@ -151,9 +172,19 @@ def edit_author(request, conference_id, paper_id, author_id):
         "paper": paper,
         "author_id": author_id,
     }
-    return render(request, 'conference/submit_paper.html', context)         
+    if url_name == 'edit_author':
+        y = render(request, 'conference/submit_paper.html', context)
+    elif url_name == 'edit_paper_edit_author': 
+        y = render(request, 'conference/edit_paper.html', context)
+    return y       
 
 def add_author(request, conference_id, paper_id):
+    url_name = resolve(request.path_info).url_name
+    if url_name == 'add_author':
+        x = redirect('submit_paper', conference_id, paper_id)
+    elif url_name == 'edit_paper_add_author':    
+        x = redirect('edit_paper', conference_id, paper_id)
+        
     paper = get_object_or_404(Paper, id=paper_id)
     form = PaperForm(instance=paper)
     display_add_author_model = True 
@@ -169,7 +200,8 @@ def add_author(request, conference_id, paper_id):
                     author.last_name = aform.cleaned_data['last_name'] #
                     author.save() #
                     # paper.save()
-                    return redirect('submit_paper', conference_id, paper_id)
+                    # return redirect('submit_paper', conference_id, paper_id)
+                    return x
                 
             author = aform.save(commit=False)
             users = User.objects.all()
@@ -183,7 +215,8 @@ def add_author(request, conference_id, paper_id):
             paper.authors.add(author.id)
             # paper.save()
 
-            return redirect('submit_paper', conference_id, paper_id)
+            # return redirect('submit_paper', conference_id, paper_id)
+            return x
         else:
             print(aform.errors)
     else:
@@ -196,11 +229,17 @@ def add_author(request, conference_id, paper_id):
         "conference_id": conference_id,
         "paper": paper,
     }
-    return render(request, 'conference/submit_paper.html', context)
+    if url_name == 'add_author':
+        y = render(request, 'conference/submit_paper.html', context)
+    elif url_name == 'edit_paper_add_author': 
+        y = render(request, 'conference/edit_paper.html', context)
+    return y
 
 @login_required(login_url='login')
-def submit_paper(request, conference_id, paper_id=None):
+def submit_paper(request, conference_id, paper_id=None, author_id=None):
     paper = get_object_or_404(Paper, id=paper_id) if paper_id else None
+    conference = get_object_or_404(Conference, id=conference_id)
+    url_name = resolve(request.path_info).url_name
 
     if request.method == 'POST':
         form = PaperForm(request.POST, request.FILES, instance=paper)
@@ -232,40 +271,38 @@ def submit_paper(request, conference_id, paper_id=None):
                             paper.authors.remove(author.id)
                             break
 
-        
-            if 'add_author' in request.POST:
+            paper.submitter = request.user
+            paper.conference = conference
+            paper.save()
+
+            action = request.GET.get('action')
+            if action == 'edit_author':
+                return redirect('edit_author', conference_id, paper.id, author_id)
+            elif action == 'delete_author':
+                return redirect('delete_author', conference_id, paper.id, author_id)
+            elif 'add_author' in request.POST:
                 return redirect('add_author', conference_id, paper.id)
+            elif 'edit_paper_add_author' in request.POST:
+                return redirect('edit_paper_add_author', conference_id, paper.id)
+            # elif 'edit_paper_edit_author' in request.POST:
+            #     return redirect('edit_paper_edit_author', conference_id, paper.id, author_id)
             elif 'submit_paper' in request.POST:
                 file_hash = hashlib.md5(paper.file.read()).hexdigest() if paper.file else None
-                title = paper.title
-                abstract = paper.abstract
-                authors = paper.authors.all()
                 paper.file_hash = file_hash
+                paper.save()
 
-                submitted_papers_with_same_file = Paper.objects.filter(Q(file_hash=file_hash) & ~Q(id=paper.id))
-                if submitted_papers_with_same_file:
-                    for submitted_paper in submitted_papers_with_same_file:
-                        if submitted_paper.conferences.filter(id=conference_id):
-                            messages.error(request, 'This paper has already been submitted to this conference!')
-                            return redirect('submit_paper', conference_id, paper.id)
-                
-                conference = get_object_or_404(Conference, id=conference_id)
-                conference.submitters.add(request.user.id)
+                if file_hash:
+                    submitted_papers_with_same_file = Paper.objects.filter(Q(file_hash=file_hash) & ~Q(id=paper.id))
+                    if submitted_papers_with_same_file:
+                        for submitted_paper in submitted_papers_with_same_file:
+                            if submitted_paper.conference==conference:
+                                messages.error(request, 'This paper has already been submitted to this conference!')
+                                return redirect('submit_paper', conference_id, paper.id)
 
-                submitted_papers = Paper.objects.exclude(id=paper_id) 
-                for submitted_paper in submitted_papers:
-                    if submitted_paper.title.replace(" ", "").lower() == title.replace(" ", "").lower() and submitted_paper.abstract.replace(" ", "").lower() == abstract.replace(" ", "").lower() and set(submitted_paper.authors.all()) == set(authors) and submitted_paper.file_hash == file_hash:
-                        if not submitted_paper.conferences.filter(id=conference_id):
-                            submitted_paper.submitters.add(request.user.id)
-                            submitted_paper.conferences.add(conference_id)
-                            paper.delete()
-                            messages.success(request, 'Paper submitted successfully!')
-                            return redirect('myAccount')
-                
-                paper.submitters.add(request.user.id)
-                paper.conferences.add(conference_id)
-                paper.save() 
-                messages.success(request, 'Paper submitted successfully!')
+                if url_name == 'submit_paper':
+                    messages.success(request, 'Paper submitted successfully!')
+                elif url_name == 'edit_paper':
+                    messages.success(request, 'Paper edited successfully!')
                 return redirect('myAccount')
         else:
             print(form.errors)         
@@ -276,57 +313,29 @@ def submit_paper(request, conference_id, paper_id=None):
         "conference_id": conference_id,
         "paper": paper,
     }
-    return render(request, 'conference/submit_paper.html', context)
+    if url_name == 'submit_paper':
+        return render(request, 'conference/submit_paper.html', context)
+    elif url_name == 'edit_paper':
+        return render(request, 'conference/edit_paper.html', context)
 
 
-def withdraw_paper(request, conference_id, paper_id):
+def withdraw_paper(request, paper_id):
     paper = get_object_or_404(Paper, id=paper_id)
-    conferences = Conference.objects.exclude(id=conference_id)
+
+    authors = paper.authors.all()
+    papers = Paper.objects.exclude(id=paper_id)
     flag = 0
-    for conference in conferences:
-        if conference in paper.conferences.all():
-            flag = 1
-            break
-    if flag == 0:
-        authors = paper.authors.all()
-        paper.delete()
-        papers = Paper.objects.all()
-        flag2 = 0
-        for author in authors:
-            if author in paper.authors.all():
-                flag2 = 1
-                break;
-        if flag2==0:
-            author.delete()
-    else:
-        paper.conferences.remove(conference_id)
-    
-        # submitters = paper.submitters.all()
-        # for submitter in submitters:
-        #     if submitter == request.user:
-        #         break
-
-        s = paper.submitters.get(request.user.id)
-        print(s)
-        flag3 = 0
-        for submitter in paper.submitters:
-            for conference in paper.conferences:  # .exclude(id=conference_id):
-                if submitter in conference.submitters:
-                    if submitter == s:
-                        flag3 = 1
-        if flag3 == 0:
-            paper.submitters.remove(request.user.id)
-
-        flag4 = 0
-        papers = Paper.objects.exclude(id=paper_id)
+    for author in authors:
         for paper in papers:
-            if conference in paper.conferences.all():
-                if request.user in paper.submitters:
-                    flag4 = 1
-        if flag4 == 0:
-            conference.submitters.remove(request.user.id)
-
-        return redirect('myAccount')
+            if author in paper.authors.all():
+                flag = 1
+                break
+        if flag == 0:
+            author.delete()
+      
+    paper.delete()
+    messages.success(request, 'Paper has been deleted successfully!')            
+    return redirect('myAccount')
 
 
 @login_required(login_url='login')
@@ -334,9 +343,14 @@ def withdraw_paper(request, conference_id, paper_id):
 def edit_is_approved(request):
     if request.method == 'POST':
         formset = ConferenceModelFormset(request.POST, queryset=Conference.objects.all())
-        if formset.is_valid():
-            # for form in formset:
-            #     form.save()
+        # flag = 0
+        # for form in formset:
+        #     if not form.is_valid():
+        #         flag = 1
+        # if flag==0:
+        #     for form in formset:
+        #         form.save()
+        if formset.is_valid():    
             formset.save()  
             return redirect('myAccount')
         else:
@@ -344,27 +358,30 @@ def edit_is_approved(request):
     else:
         formset = ConferenceModelFormset(queryset = Conference.objects.all())
 
+    for form in formset:
+        form.instance.start_date = DateFormat(form.instance.start_date).format('Y-m-d')
+        form.instance.end_date = DateFormat(form.instance.end_date).format('Y-m-d')
+        form.instance.submission_deadline = DateFormat(form.instance.submission_deadline).format('Y-m-d')
     context = {
         'formset': formset,
     }
-
     return render(request, 'conference/edit_is_approved.html', context)
 
 
-def approve(request, uidb64, token):
-    try:
-        uid = urlsafe_base64_decode(uidb64).decode()
-        user = User._default_manager.get(pk=uid)
-    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None    
+# def approve(request, uidb64, token):
+#     try:
+#         uid = urlsafe_base64_decode(uidb64).decode()
+#         user = User._default_manager.get(pk=uid)
+#     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+#         user = None    
 
-    if user is not None and default_token_generator.check_token(user, token):
-        request.session['uid'] = uid
-        messages.info(request, 'Approve/Disapprove conference')
-        return redirect('edit_is_approved')
-    else:
-        messages.error(request, 'This link has been expired!')
-        return redirect('myAccount')   
+#     if user is not None and default_token_generator.check_token(user, token):
+#         request.session['uid'] = uid
+#         messages.info(request, 'Approve/Disapprove conference')
+#         return redirect('edit_is_approved')
+#     else:
+#         messages.error(request, 'This link has been expired!')
+#         return redirect('myAccount')   
 
 
 

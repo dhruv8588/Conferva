@@ -2,7 +2,6 @@ from datetime import date
 from django import forms
 from django.contrib.admin.widgets import AdminDateWidget
 from django.forms import modelformset_factory
-from django.db.models import Q
 
 from .validators import allow_only_pdf_or_docx_validator
 
@@ -43,13 +42,12 @@ class ConferenceForm(forms.ModelForm):
 
 
 class PaperForm(forms.ModelForm):
-    # file = forms.FileField(widget=forms.FileInput(attrs={'class': 'btn btn-info'}), validators=[allow_only_pdf_or_docx_validator])
+    file = forms.FileField(widget=forms.FileInput(attrs={'class': 'btn btn-info'}), required=False) #, validators=[allow_only_pdf_or_docx_validator]
     is_submitter_author = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
     class Meta:
         model = Paper
         fields = ['title', 'abstract', 'file', 'is_submitter_author'] 
-        # fields = ['title', 'abstract', 'authors', 'file']  
-  
+        
 
 ConferenceModelFormset = modelformset_factory(
     Conference,

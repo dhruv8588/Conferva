@@ -57,6 +57,6 @@
   }); 
 {% endblock js %}
   function redirectToSubmitPaper() {
-    window.location.href = "{% url 'submit_paper' conference_id paper.id %}";
+    window.location.href = {% block redirect-link %}"{% url 'submit_paper' conference_id paper.id %}"{% endblock %};
   }
 </script>
