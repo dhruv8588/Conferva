@@ -1,104 +1,440 @@
-{% extends 'base.html' %}
 
-{% block content %}
-    <div class="row">
-        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            {% include 'includes/alerts.html' %}
+
+    
+<!-- 
+<br class="container">
+      <h1>Conferences accepting submissions</h1>
+      <div class="row mt-3 justify-content-center">
+        <div class="col-25">
+          <div class="input-group">
+            <input
+              type="text"
+              onkeyup="searchFunction()"
+              class="form-control"
+              id="search"
+              placeholder="Search for..."
+            />
+            <div class="input-group-append">
+              <a href="{% url 'conference_listing' %}" class="btn btn-dark">
+                <i class="fas fa-sync-alt"></i>
+              </a>
+            </div>
+          </div>
         </div>
-    </div>
-    <div class="input-group input-group-sm mb-3 mt-2">
-        <input type="text" onkeyup="searchFunction()" class="form-control" id="search" placeholder="Search for...">
-        <a href="{% url 'conference_listing' %}" class="btn btn-dark"><i class="fas fa-sync-alt"></i></a>
-        {% comment %} <button type="reset" class="btn btn-outline-dark mb-3 ms-2" style="width: 50px;"><i class="fas fa-sync-alt"></i></button> {% endcomment %}
-    <table class="table" id="myTable">
-        <thead>
+        {% comment %}
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+          <button type="reset" class="btn btn-dark">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+        {% endcomment %}
+      </div>
+      
+    <table class="rwd-table mt-3" id="myTable">
+      <tbody>
         <tr id="chk-th">
-            <th scope="col">#</th>
-            <th scope="col">Name</th>
-            <th scope="col">Acronym</th>
-            <th scope="col">Research area</th>
-            <th scope="col">Where</th>
-            <th scope="col">Start date</th>
-            <th scope="col">End date</th>
-            <th scope="col">Submission Deadline</th>
-            <th scope="col">Link to submit</th>    
+          <th >#</th>
+          <th >Name</th>
+          <th >Acronym</th>
+          <th >Research area</th>
+          <th >Where</th>
+          <th >Start date</th>
+          <th>End date</th>
+          <th >Submission Deadline</th>
+          <th >Link to submit</th>
         </tr>
-        </thead>
-        <tbody>
-            {% for conference in conferences %}
-                <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
-                    <td>{{ conference.name }}</td>
-                    <td>{{ conference.acronym }}</td>
-                    <td>{{ conference.research_area }}</td>
-                    <td>{{ conference.venue }}, {{ conference.city }}, {{ conference.country }}</td>
-                    <td>{{ conference.start_date }}</td>
-                    <td>{{ conference.end_date }}</td>
-                    <td>{{ conference.submission_deadline }}</td>
-                    <td>
-                        {% if conference.submission_deadline >= today  %}
-                            <a href="{% url 'submit_paper' conference.id %}">Submit</a>
-                        {% endif %}    
-                    </td>
-                </tr>
-            {% endfor %}    
-        </tbody>
+      </tbody>
+      <tbody>
+        {% for conference in conferences %}
+        <tr>
+          <th scope="row">{{ forloop.counter }}</th>
+          <td>{{ conference.name }}</td>
+          <td>{{ conference.acronym }}</td>
+          <td>{{ conference.research_area }}</td>
+          <td>
+            {{ conference.venue }}, {{ conference.city }}, {{ conference.country}}
+          </td>
+          <td>{{ conference.start_date }}</td>
+          <td>{{ conference.end_date }}</td>
+          <td>{{ conference.submission_deadline }}</td>
+          {% if conference.submission_deadline >= today  %}
+                           
+                            <td data-th="Submit">
+                                <a target="_blank" class="fcc-btn" href="{% url 'submit_paper' conference.id %}">Click Here</a>  
+                            </td>
+                            {% endif %}
+          
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
+  </div>
 
-    <br/><br/>
-    {% comment %} {{ page_obj }}<br/>
-    has next {{ page_obj.has_next }}<br/>
-    has previous {{ page_obj.has_previous }}<br/>
-    current page {{ page_obj.number }}<br/>
-    no. of pages {{ page_obj.paginator.num_pages }}<br/> {% endcomment %}
-
+    <br /><br />
+    {% comment %} {{ page_obj }}<br />
+    has next {{ page_obj.has_next }}<br />
+    has previous {{ page_obj.has_previous }}<br />
+    current page {{ page_obj.number }}<br />
+    no. of pages {{ page_obj.paginator.num_pages }}<br />
+    {% endcomment %}
 
     <span class="text-danger" id="no-data"></span>
 
     <script>
-        function searchFunction() {
-            let input, filter, table, tr, td, j;
-            input = document.getElementById("search");
-            filter = input.value.toUpperCase();
-            table = document.getElementById("myTable");
-            tr = table.getElementsByTagName("tr");
+      function searchFunction() {
+        let input, filter, table, tr, td, j;
+        input = document.getElementById("search");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("myTable");
+        tr = table.getElementsByTagName("tr");
 
-            for (j=0; j<tr.length; j++) {
-                td = tr[j].getElementsByTagName("td");
-                msg = document.getElementById("no-data");
+        for (j = 0; j < tr.length; j++) {
+          td = tr[j].getElementsByTagName("td");
+          msg = document.getElementById("no-data");
 
-                if (td.length > 0) {
-                    if (td[0].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
-                    td[1].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
-                    td[2].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
-                    td[3].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
-                    td[4].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
-                    td[5].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
-                    td[6].innerHTML.toLocaleUpperCase().indexOf(filter) > -1) {
-                        tr[j].style.display = "";
-                        msg.innerHTML = "";
-                    }
-                    else {
-                        tr[j].style.display = "none";
-                    }
-                }
-                if (td.length == 0) {
-                    msg.innerHTML = "Conference not found"
-                }
+          if (td.length > 0) {
+            if (
+              td[0].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+              td[1].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+              td[2].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+              td[3].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+              td[4].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+              td[5].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+              td[6].innerHTML.toLocaleUpperCase().indexOf(filter) > -1
+            ) {
+              tr[j].style.display = "";
+              msg.innerHTML = "";
+            } else {
+              tr[j].style.display = "none";
             }
+          }
+          if (td.length == 0) {
+            msg.innerHTML = "Conference not found";
+          }
         }
-    </script>    
+      }
+    </script>
 
     <style>
-        #no-data {
-            width: 80%;
-            position: absolute;
-            top: 150%;
-            left: 50%;
-            margin-right: -50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            font-size: 25px;
+      #no-data {
+        width: 80%;
+        position: absolute;
+        top: 150%;
+        left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        font-size: 25px;
+      }
+    </style>
+   
+  </div>
+</div>  -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../static/css/index.css"> 
+    
+    <title>Data Table</title>
+    <style>
+        @import 'https://fonts.googleapis.com/css?family=Open+Sans:600,700';
+
+* {font-family: 'Open Sans', sans-serif;}
+
+.rwd-table {
+  margin: auto;
+  min-width: 300px;
+  max-width: 100%;
+  border-collapse: collapse;
+}
+
+.rwd-table tr:first-child {
+  border-top: none;
+  background: #428bca;
+  color: #fff;
+}
+
+.rwd-table tr {
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  background-color: #f5f9fc;
+}
+
+.rwd-table tr:nth-child(odd):not(:first-child) {
+  background-color: #ebf3f9;
+}
+
+.rwd-table th {
+  display: none;
+}
+
+.rwd-table td {
+  display: block;
+}
+
+.rwd-table td:first-child {
+  margin-top: .5em;
+}
+
+.rwd-table td:last-child {
+  margin-bottom: .5em;
+}
+
+.rwd-table td:before {
+  content: attr(data-th) ": ";
+  font-weight: bold;
+  width: 120px;
+  display: inline-block;
+  color: #000;
+}
+
+.rwd-table th,
+.rwd-table td {
+  text-align: left;
+}
+
+.rwd-table {
+  color: #333;
+  border-radius: .4em;
+  overflow: hidden;
+  margin-top: 50px;
+}
+
+.rwd-table tr {
+  border-color: #bfbfbf;
+}
+
+.rwd-table th,
+.rwd-table td {
+  padding: .5em 1em;
+}
+@media screen and (max-width: 601px) {
+  .rwd-table tr:nth-child(2) {
+    border-top: none;
+  }
+}
+@media screen and (min-width: 600px) {
+  .rwd-table tr:hover:not(:first-child) {
+    background-color: #d8e7f3;
+  }
+  .rwd-table td:before {
+    display: none;
+  }
+  .rwd-table th,
+  .rwd-table td {
+    display: table-cell;
+    padding: .25em .5em;
+  }
+  .rwd-table th:first-child,
+  .rwd-table td:first-child {
+    padding-left: 0;
+  }
+  .rwd-table th:last-child,
+  .rwd-table td:last-child {
+    padding-right: 0;
+  }
+  .rwd-table th,
+  .rwd-table td {
+    padding: 1em !important;
+  }
+}
+
+body {
+  background: #4B79A1;
+  background: -webkit-linear-gradient(to left, #4B79A1 , #283E51);
+  background: linear-gradient(to left, #4B79A1 , #283E51);        
+  }
+  h1 {
+    text-align: center;
+    font-size: 2.4em;
+    color: #f2f2f2;
+   
+  }
+  .container {
+    display: block;
+    text-align: center;
+    margin-top: 45px;
+    margin-top: 150px;
+  }
+  h3 {
+    display: inline-block;
+    position: relative;
+    text-align: center;
+    font-size: 1.5em;
+    color: #cecece;
+  }
+  h3:before {
+    content: "\25C0";
+    position: absolute;
+    left: -50px;
+    -webkit-animation: leftRight 2s linear infinite;
+    animation: leftRight 2s linear infinite;
+  }
+  h3:after {
+    content: "\25b6";
+    position: absolute;
+    right: -50px;
+    -webkit-animation: leftRight 2s linear infinite reverse;
+    animation: leftRight 2s linear infinite reverse;
+  }
+@-webkit-keyframes leftRight {
+  0%    { -webkit-transform: translateX(0)}
+  25%   { -webkit-transform: translateX(-10px)}
+  75%   { -webkit-transform: translateX(10px)}
+  100%  { -webkit-transform: translateX(0)}
+}
+@keyframes leftRight {
+  0%    { transform: translateX(0)}
+  25%   { transform: translateX(-10px)}
+  75%   { transform: translateX(10px)}
+  100%  { transform: translateX(0)}
+}
+
+    </style>
+</head>
+<body>
+    
+    <nav class="nav">
+        <div class="nav-logo">
+            <p>CONFERENCE MEET</p>
+        </div>
+        <div class="nav-menu" id="navMenu">
+            <ul>
+                <li><a href="#" class="link" >Home</a></li>
+                <li><a href="#" class="link">About</a></li>
+                <li><a href="{% url 'create_conference' %}" class="link" onclick="toggleForm()">Register for Our conference</a> </li>
+                <li><a href="{% url 'conference_listing' %}" class="link">Submit Paper</a></li>
+              
+            </ul>
+        </div>
+        <div class="nav-button">
+            <button class="btn white-btn" id="loginBtn" onclick="login()">Login</button>
+            <button class="btn" id="registerBtn" onclick="register()"> Register</button>
+        </div>
+        <div class="nav-menu-btn">
+            <i class="bx bx-menu" onclick="myMenuFunction()"></i>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Conferences accepting submissions</h1>
+       
+        <table class="rwd-table">
+            <tbody>
+                <tr>
+                    <th >#</th>
+          <th >Name</th>
+          <th >Acronym</th>
+          <th >Research area</th>
+          <th >Where</th>
+          <th >Start date</th>
+          <th>End date</th>
+          <th >Submission Deadline</th>
+          <th >Link to submit</th>
+                </tr>
+
+                {% for conference in conferences %}
+                <tr>
+                    <td data-th="#">
+                        {{ forloop.counter }}
+                    </td>
+                    <td data-th="Name">
+                        {{ conference.name }}
+                    </td>
+                    <td data-th="Acronym">
+                        {{ conference.acronym }}
+                    </td>
+                    <td data-th="Research Area">
+                        {{ conference.research_area }}
+                    </td>
+                    <td data-th="Where">
+                        {{ conference.venue }}, {{ conference.city }}, {{ conference.country}}
+                    </td>
+                    <td data-th="Start Date">
+                        {{ conference.start_date }}
+                    </td>
+                    <td data-th="End Date">
+                        {{ conference.end_date }}
+                    </td>
+                    <td data-th="Submission Deadline">
+                        {{ conference.submission_deadline }}
+                    </td>
+                    <td data-th="Submit">
+                        <a target="_blank" class="fcc-btn" href="{% url 'submit_paper' conference.id %}">Click Here</a>  
+                    </td>
+                </tr>
+               {% endfor%}
+                <!-- Add more conference rows here -->
+            </tbody>
+        </table>
+    </div>
+    <span class="text-danger" id="no-data"></span>
+
+    <script>
+      function searchFunction() {
+        let input, filter, table, tr, td, j;
+        input = document.getElementById("search");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("myTable");
+        tr = table.getElementsByTagName("tr");
+
+        for (j = 0; j < tr.length; j++) {
+          td = tr[j].getElementsByTagName("td");
+          msg = document.getElementById("no-data");
+
+          if (td.length > 0) {
+            if (
+              td[0].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+              td[1].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+              td[2].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+              td[3].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+              td[4].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+              td[5].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
+              td[6].innerHTML.toLocaleUpperCase().indexOf(filter) > -1
+            ) {
+              tr[j].style.display = "";
+              msg.innerHTML = "";
+            } else {
+              tr[j].style.display = "none";
+            }
+          }
+          if (td.length == 0) {
+            msg.innerHTML = "Conference not found";
+          }
         }
-    </style>    
-{% endblock %}
+      }
+    </script>
+
+    <style>
+      #no-data {
+        width: 80%;
+        position: absolute;
+        top: 150%;
+        left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        font-size: 25px;
+      }
+    </style>
+   
+   
+   
+</body>
+</html>
+
+
+<!-- <th scope="row">{{ forloop.counter }}</th>
+<td>{{ conference.name }}</td>
+<td>{{ conference.acronym }}</td>
+<td>{{ conference.research_area }}</td>
+<td>
+  {{ conference.venue }}, {{ conference.city }}, {{ conference.country}}
+</td>
+<td>{{ conference.start_date }}</td>
+<td>{{ conference.end_date }}</td>
+<td>{{ conference.submission_deadline }}</td> -->

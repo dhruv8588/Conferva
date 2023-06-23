@@ -23,7 +23,6 @@ def check_role_guest(user):
         return True
     else:
         raise PermissionDenied    
-
 def registerUser(request):
     if request.user.is_authenticated:
         messages.warning(request, 'You are already logged in!')
@@ -47,11 +46,13 @@ def registerUser(request):
             return redirect('registerUser')
     else:
         form = UserForm()
+    register_user = True    
     context = {
         'form': form,
+        'register_user': register_user,
         'non_field_errors': form.non_field_errors(),
     }
-    return render(request, 'accounts/registerUser.html', context)
+    return render(request, 'home.html', context)
 
 def activate(request, uidb64, token):
     try:
@@ -86,8 +87,75 @@ def login(request):
         else:
             messages.error(request, 'Invalid login credentials')
             return redirect('login')
+    login_user = True   
+    context = {
+        'login_user': login_user,
+    }
+    return render(request, 'home.html', context)
+# def registerUser(request):
+#     if request.user.is_authenticated:
+#         messages.warning(request, 'You are already logged in!')
+#         return redirect('myAccount')
+#     elif request.method=='POST':
+#         form = UserForm(request.POST)
+#         if form.is_valid():
+#             first_name = form.cleaned_data['first_name']
+#             last_name = form.cleaned_data['last_name']
+#             username = form.cleaned_data['username']
+#             email = form.cleaned_data['email'].lower()
+#             password = form.cleaned_data['password']
+#             user = User.objects.create_user(first_name=first_name, last_name=last_name, username=username, email=email, password=password)
+#             user.save()
+            
+#             mail_subject = 'Please activate your account'
+#             email_template = 'accounts/emails/account_verification.html'
+#             send_verification_email(request, user, mail_subject, email_template)
 
-    return render(request, 'accounts/login.html')
+#             messages.success(request, 'Your account has been registered sucessfully!')
+#             return redirect('registerUser')
+#     else:
+#         form = UserForm()
+#     context = {
+#         'form': form,
+#         'non_field_errors': form.non_field_errors(),
+#     }
+#     return render(request, 'home.html', context)
+
+# def activate(request, uidb64, token):
+#     try:
+#         uid = urlsafe_base64_decode(uidb64).decode()
+#         user = User._default_manager.get(pk=uid)
+#     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+#         user = None
+
+#     if user is not None and default_token_generator.check_token(user, token):
+#         user.is_active = True
+#         user.save()
+#         messages.success(request, 'Congratulations! Your account is activated.')
+#         return redirect('myAccount')
+#     else:
+#         messages.error(request, 'Invalid activation link')    
+#         return redirect('myAccount')
+
+# def login(request):
+#     if request.user.is_authenticated:
+#         messages.warning(request, 'You are already logged in!')
+#         return redirect('myAccount')
+#     elif request.method=="POST":
+#         email = request.POST["email"]
+#         password = request.POST["password"]
+
+#         user = auth.authenticate(email=email, password=password)
+
+#         if user is not None:
+#             auth.login(request, user)
+#             messages.success(request, 'You are now logged in.')
+#             return redirect('myAccount')
+#         else:
+#             messages.error(request, 'Invalid login credentials')
+#             return redirect('login')
+
+#     return render(request, 'accounts/login.html')
 
 def logout(request):
     auth.logout(request)
