@@ -2,441 +2,455 @@
 {% block content %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="../static/index.css" />
 
-    <title>Conference meeting</title>
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap");
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Poppins", sans-serif;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../static/index.css" />
 
-      body {
-        background-image: url("static/images/conference.jpg");
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        overflow: hidden;
-        opacity: 0.9;
-      }
-      .button-two {
-        border-radius: 4px;
-        background-color: #1bd864;
-        border: none;
-        padding: 20px;
-        width: 200px;
-        transition: all 0.5s;
-      }
-      .button-two span {
-        cursor: pointer;
-        display: inline-block;
-        position: relative;
-        transition: 0.5s;
-      }
-      .button-two span:after {
-        content: "»";
-        position: absolute;
-        opacity: 0;
-        top: 0;
-        right: -20px;
-        transition: 0.5s;
-      }
-      .button-two:hover span {
-        padding-right: 25px;
-      }
-      .button-two:hover span:after {
-        opacity: 1;
-        right: 0;
-      }
-      .wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 110vh;
-        background: rgba(39, 39, 39, 0.4);
-      }
-      .nav {
-        position: fixed;
-        top: 0;
-        display: flex;
-        justify-content: space-around;
-        width: 100%;
-        height: 100px;
-        line-height: 100px;
-        background: linear-gradient(rgba(39, 39, 39, 0.6), transparent);
-        z-index: 100;
-      }
-      .nav-logo p {
-        color: white;
-        font-size: 25px;
-        font-weight: 600;
-      }
-      .nav-menu ul {
-        display: flex;
-      }
-      .nav-menu ul li {
-        list-style-type: none;
-      }
-      .nav-menu ul li .link {
-        text-decoration: none;
-        font-weight: 500;
-        color: #fff;
-        padding-bottom: 15px;
-        margin: 0 25px;
-      }
-      .link:hover,
-      .active {
-        border-bottom: 2px solid #fff;
-      }
+  <title>Conference meeting</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap");
 
-      .nav-button .btn {
-        width: 130px;
-        height: 40px;
-        font-weight: 500;
-        background: rgba(255, 255, 255, 0.4);
-        border: none;
-        border-radius: 30px;
-        cursor: pointer;
-        transition: 0.3s ease;
-      }
-      .btn:hover {
-        background: rgba(255, 255, 255, 0.3);
-      }
-      #registerBtn {
-        margin-left: 15px;
-      }
-      .btn.white-btn {
-        background: rgba(255, 255, 255, 0.7);
-      }
-      .btn.btn.white-btn:hover {
-        background: rgba(255, 255, 255, 0.5);
-      }
-      .nav-menu-btn {
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background-image: url("static/images/conference.jpg");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      overflow: hidden;
+      opacity: 0.9;
+    }
+
+    .button-two {
+      border-radius: 4px;
+      background-color: #1bd864;
+      border: none;
+      padding: 20px;
+      width: 200px;
+      transition: all 0.5s;
+    }
+
+    .button-two span {
+      cursor: pointer;
+      display: inline-block;
+      position: relative;
+      transition: 0.5s;
+    }
+
+    .button-two span:after {
+      content: "»";
+      position: absolute;
+      opacity: 0;
+      top: 0;
+      right: -20px;
+      transition: 0.5s;
+    }
+
+    .button-two:hover span {
+      padding-right: 25px;
+    }
+
+    .button-two:hover span:after {
+      opacity: 1;
+      right: 0;
+    }
+
+    .wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 110vh;
+      background: rgba(39, 39, 39, 0.4);
+    }
+
+    .nav {
+      position: fixed;
+      top: 0;
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      height: 100px;
+      line-height: 100px;
+      background: linear-gradient(rgba(39, 39, 39, 0.6), transparent);
+      z-index: 100;
+    }
+
+    .nav-logo p {
+      color: white;
+      font-size: 25px;
+      font-weight: 600;
+    }
+
+    .nav-menu ul {
+      display: flex;
+    }
+
+    .nav-menu ul li {
+      list-style-type: none;
+    }
+
+    .nav-menu ul li .link {
+      text-decoration: none;
+      font-weight: 500;
+      color: #fff;
+      padding-bottom: 15px;
+      margin: 0 25px;
+    }
+
+    .link:hover,
+    .active {
+      border-bottom: 2px solid #fff;
+    }
+
+    .nav-button .btn {
+      width: 130px;
+      height: 40px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.4);
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    #registerBtn {
+      margin-left: 15px;
+    }
+
+    .btn.white-btn {
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .btn.btn.white-btn:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .nav-menu-btn {
+      display: none;
+    }
+
+    .form-box {
+      position: absolute;
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+      width: 600px;
+      height: 600px;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .login-container {
+      position: relative;
+      left: 4px;
+      width: 500px;
+      display: flex;
+      flex-direction: column;
+      transition: 0.5s ease-in-out;
+    }
+
+    .register-container {
+      position: absolute;
+      right: -550px;
+      width: 500px;
+      height: 700px;
+      top:400px;
+
+      display: flex;
+      flex-direction: column;
+      transition: 0.5s ease-in-out;
+    }
+
+    .top span {
+      color: #fff;
+      font-size: small;
+      padding: 10px 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .top span a {
+      font-weight: 500;
+      color: #fff;
+      margin-left: 5px;
+    }
+
+    header {
+      color: #fff;
+      font-size: 30px;
+      text-align: center;
+      padding: 10px 0 30px 0;
+    }
+
+    .two-forms {
+      display: flex;
+      gap: 10px;
+    }
+
+    .input-field {
+      font-size: 15px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      height: 50px;
+      width: 100%;
+      padding: 0 10px 0 45px;
+      border: none;
+      border-radius: 30px;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    .input-field:hover,
+    .input-field:focus {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    ::-webkit-input-placeholder {
+      color: #fff;
+    }
+
+    .input-box i {
+      position: relative;
+      top: -35px;
+      left: 17px;
+      color: #fff;
+    }
+
+    .submit {
+      font-size: 15px;
+      font-weight: 500;
+      color: black;
+      height: 45px;
+      width: 100%;
+      border: none;
+      border-radius: 30px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      transition: 0.3s ease-in-out;
+    }
+
+    .submit:hover {
+      background: rgba(255, 255, 255, 0.5);
+      box-shadow: 1px 5px 7px 1px rgba(0, 0, 0, 0.2);
+    }
+
+    .two-col {
+      display: flex;
+      justify-content: space-between;
+      color: #fff;
+      font-size: small;
+      margin-top: 10px;
+    }
+
+    .two-col .one {
+      display: flex;
+      gap: 5px;
+    }
+
+    .two label a {
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .two label a:hover {
+      text-decoration: underline;
+    }
+
+    @media only screen and (max-width: 786px) {
+      .nav-button {
         display: none;
       }
-      .form-box {
-        position: absolute;
-        display: flex;
 
-        align-items: center;
-        justify-content: center;
-        width: 600px;
-        height: 420px;
-        overflow: hidden;
-        z-index: 2;
+      .nav-menu.responsive {
+        top: 100px;
       }
-      .login-container {
-        position: absolute;
-        left: 4px;
-        width: 500px;
-        display: flex;
-        flex-direction: column;
-        transition: 0.5s ease-in-out;
-      }
-      .register-container {
-        position: absolute;
-        right: -520px;
-        width: 500px;
 
-        display: flex;
-        flex-direction: column;
-        transition: 0.5s ease-in-out;
-      }
-      .top span {
-        color: #fff;
-        font-size: small;
-        padding: 10px 0;
+      .nav-menu {
+        position: absolute;
+        top: -800px;
         display: flex;
         justify-content: center;
-      }
-      .top span a {
-        font-weight: 500;
-        color: #fff;
-        margin-left: 5px;
-      }
-      header {
-        color: #fff;
-        font-size: 30px;
-        text-align: center;
-        padding: 10px 0 30px 0;
-      }
-      .two-forms {
-        display: flex;
-        gap: 10px;
-      }
-      .input-field {
-        font-size: 15px;
         background: rgba(255, 255, 255, 0.2);
-        color: #fff;
-        height: 50px;
         width: 100%;
-        padding: 0 10px 0 45px;
-        border: none;
-        border-radius: 30px;
-        outline: none;
-        transition: 0.2s ease;
+        height: 90vh;
+        backdrop-filter: blur(20px);
+        transition: 0.3s;
       }
-      .input-field:hover,
-      .input-field:focus {
-        background: rgba(255, 255, 255, 0.25);
+
+      .nav-menu ul {
+        flex-direction: column;
+        text-align: center;
       }
-      ::-webkit-input-placeholder {
+
+      .nav-menu-btn {
+        display: block;
+      }
+
+      .nav-menu-btn i {
+        font-size: 25px;
         color: #fff;
-      }
-      .input-box i {
-        position: relative;
-        top: -35px;
-        left: 17px;
-        color: #fff;
-      }
-      .submit {
-        font-size: 15px;
-        font-weight: 500;
-        color: black;
-        height: 45px;
-        width: 100%;
-        border: none;
-        border-radius: 30px;
-        outline: none;
-        background: rgba(255, 255, 255, 0.7);
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
         cursor: pointer;
-        transition: 0.3s ease-in-out;
+        transition: 0.3s;
       }
-      .submit:hover {
-        background: rgba(255, 255, 255, 0.5);
-        box-shadow: 1px 5px 7px 1px rgba(0, 0, 0, 0.2);
+
+      .nav-menu-btn i:hover {
+        background: rgba(255, 255, 255, 0.15);
       }
-      .two-col {
-        display: flex;
-        justify-content: space-between;
-        color: #fff;
-        font-size: small;
-        margin-top: 10px;
+    }
+
+    @media only screen and (max-width: 540px) {
+      .wrapper {
+        min-height: 100vh;
       }
-      .two-col .one {
-        display: flex;
-        gap: 5px;
+
+      .form-box {
+        width: 100%;
+        height: 500px;
       }
-      .two label a {
-        text-decoration: none;
-        color: #fff;
+
+      .register-container,
+      .login-container {
+        width: 100%;
+        padding: 0 20px;
       }
-      .two label a:hover {
-        text-decoration: underline;
+
+      .register-container .two-forms {
+        flex-direction: column;
+        gap: 0;
       }
-      @media only screen and (max-width: 786px) {
-        .nav-button {
-          display: none;
-        }
-        .nav-menu.responsive {
-          top: 100px;
-        }
-        .nav-menu {
-          position: absolute;
-          top: -800px;
-          display: flex;
-          justify-content: center;
-          background: rgba(255, 255, 255, 0.2);
-          width: 100%;
-          height: 90vh;
-          backdrop-filter: blur(20px);
-          transition: 0.3s;
-        }
-        .nav-menu ul {
-          flex-direction: column;
-          text-align: center;
-        }
-        .nav-menu-btn {
-          display: block;
-        }
-        .nav-menu-btn i {
-          font-size: 25px;
-          color: #fff;
-          padding: 10px;
-          background: rgba(255, 255, 255, 0.2);
-          border-radius: 50%;
-          cursor: pointer;
-          transition: 0.3s;
-        }
-        .nav-menu-btn i:hover {
-          background: rgba(255, 255, 255, 0.15);
-        }
-      }
-      @media only screen and (max-width: 540px) {
-        .wrapper {
-          min-height: 100vh;
-        }
-        .form-box {
-          width: 100%;
-          height: 500px;
-        }
-        .register-container,
-        .login-container {
-          width: 100%;
-          padding: 0 20px;
-        }
-        .register-container .two-forms {
-          flex-direction: column;
-          gap: 0;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrapper">
-      <nav class="nav">
-        <div class="nav-logo">
-          <p>CONFERENCE MEET</p>
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <nav class="nav">
+      <div class="nav-logo">
+        <p>CONFERENCE MEET</p>
+      </div>
+      <div class="nav-menu" id="navMenu">
+        <ul>
+          <li><a href="#" class="link">Home</a></li>
+          <li><a href="#" class="link">About</a></li>
+          <li>
+            <a href="{% url 'create_conference' %}" class="link" onclick="toggleForm()">Register for Our conference</a>
+          </li>
+          <li>
+            <a href="{% url 'conference_listing' %}" class="link">Submit Paper</a>
+          </li>
+        </ul>
+      </div>
+      <div class="nav-button">
+        <button class="btn white-btn" id="loginBtn" onclick="login()">
+          <a href="#login"> Login</a>
+         
+        </button>
+        <button class="btn" id="registerBtn" onclick="register()">
+          <a href="#RegisterUser">Register</a>
+        </button>
+      </div>
+      <div class="nav-menu-btn">
+        <i class="bx bx-menu" onclick="myMenuFunction()"></i>
+      </div>
+    </nav>
+    <div class="form-box">
+      <div class="home-container" id="home">
+        <!-- <button onclick="toggleForm()">Open Form</button> -->
+        <!-- <button class="button-two" onclick="toggleForm()"><span>Register for Our conference</span></button> -->
+        <!-- <a href="form.html" class="button-two" onclick="toggleForm()"><span>Register for Our conference</span></a> -->
+      </div>
+    </div>
+    <!----------------------------- Form box ----------------------------------->
+    <div class="form-box">
+      <!------------------- login form -------------------------->
+    
+      <div class="login-container" id="login">
+        <div class="top">
+          <!-- <span>Don't have an account? <a href="#" onclick="register()">Sign Up</a></span> -->
+          <header>Login</header>
         </div>
-        <div class="nav-menu" id="navMenu">
-          <ul>
-            <li><a href="#" class="link">Home</a></li>
-            <li><a href="#" class="link">About</a></li>
-            <li>
-              <a
-                href="{% url 'create_conference' %}"
-                class="link"
-                onclick="toggleForm()"
-                >Register for Our conference</a
-              >
-            </li>
-            <li>
-              <a href="{% url 'conference_listing' %}" class="link"
-                >Submit Paper</a
-              >
-            </li>
-          </ul>
+        <div class="input-box">
+          <input type="text" class="input-field" placeholder="Username or Email" />
+          <i class="bx bx-user"></i>
         </div>
-        <div class="nav-button">
-          <button class="btn white-btn" id="loginBtn" onclick="login()">
-            Login
-          </button>
-          <button class="btn" id="registerBtn" onclick="register()">
-            <a href="{% url 'registerUser'%}">Register</a>
-          </button>
+        <div class="input-box">
+          <input type="password" class="input-field" placeholder="Password" />
+          <i class="bx bx-lock-alt"></i>
         </div>
-        <div class="nav-menu-btn">
-          <i class="bx bx-menu" onclick="myMenuFunction()"></i>
+        <div class="input-box">
+          <input type="submit" class="submit" value="Sign In" />
         </div>
-      </nav>
-      <div class="form-box">
-        <div class="home-container" id="home">
-          <!-- <button onclick="toggleForm()">Open Form</button> -->
-          <!-- <button class="button-two" onclick="toggleForm()"><span>Register for Our conference</span></button> -->
-          <!-- <a href="form.html" class="button-two" onclick="toggleForm()"><span>Register for Our conference</span></a> -->
+        <div class="two-col">
+          <div class="one">
+            <input type="checkbox" id="login-check" />
+            <label for="login-check"> Remember Me</label>
+          </div>
+          <div class="two">
+            <label><a href="#">Forgot password?</a></label>
+          </div>
         </div>
       </div>
-      <!----------------------------- Form box ----------------------------------->
-      <div class="form-box">
-        <!------------------- login form -------------------------->
-        {% if login_user %}
-        <div class="login-container" id="login">
-          <div class="top">
-            <!-- <span>Don't have an account? <a href="#" onclick="register()">Sign Up</a></span> -->
-            <header>Login</header>
-          </div>
-          <div class="input-box">
-            <input
-              type="text"
-              class="input-field"
-              placeholder="Username or Email"
-            />
-            <i class="bx bx-user"></i>
-          </div>
-          <div class="input-box">
-            <input type="password" class="input-field" placeholder="Password" />
-            <i class="bx bx-lock-alt"></i>
-          </div>
-          <div class="input-box">
-            <input type="submit" class="submit" value="Sign In" />
-          </div>
-          <div class="two-col">
-            <div class="one">
-              <input type="checkbox" id="login-check" />
-              <label for="login-check"> Remember Me</label>
-            </div>
-            <div class="two">
-              <label><a href="#">Forgot password?</a></label>
-            </div>
-          </div>
-        </div>
-        {% endif %}
+      
 
-        <!------------------- registration form -------------------------->
-        {% if register_user %}
+
+
+      <!------------------- registration form -------------------------->
+
+
+      <div id="RegisterUser">
         <form action="{% url 'registerUser' %}" method="post">
           {% csrf_token %}
-
           <div class="register-container" id="register">
             <div class="top">
+
               <!-- <span>Have an account? <a href="#" onclick="login()">Login</a></span> -->
               <header>Register Here !!</header>
+
             </div>
+
             <div class="two-forms">
               <div class="input-box">
-                <input
-                  type="text"
-                  class="input-field"
-                  placeholder="Firstname"
-                  value="{{ form.instance.first_name }}"
-                />
+                <input type="text" class="input-field" placeholder="Firstname" value="{{ form.instance.first_name }}" />
                 <i class="bx bx-user"></i>
               </div>
               <div class="input-box">
-                <input
-                  type="text"
-                  class="input-field"
-                  placeholder="Lastname"
-                  value="{{ form.instance.last_name }}"
-                />
+                <input type="text" class="input-field" placeholder="Lastname" value="{{ form.instance.last_name }}" />
                 <i class="bx bx-user"></i>
               </div>
             </div>
             <div class="input-box">
-              <input
-                type="text"
-                class="input-field"
-                placeholder="Username"
-                value="{{ form.instance.username }}"
-              />
+              <input type="text" class="input-field" placeholder="Username" value="{{ form.instance.username }}" />
               <i class="bx bx-envelope"></i>
             </div>
             <div class="input-box">
-              <input
-                type="text"
-                class="input-field"
-                placeholder="Email"
-                value="{{ form.instance.email }}"
-              />
+              <input type="text" class="input-field" placeholder="Email" value="{{ form.instance.email }}" />
               <i class="bx bx-envelope"></i>
             </div>
             <div class="input-box">
-              <input
-                type="password"
-                class="input-field"
-                placeholder="Password"
-                value="{{ form.instance.password }}"
-              />
+              <input type="password" class="input-field" placeholder="Password" value="{{ form.instance.password }}" />
               <i class="bx bx-lock-alt"></i>
             </div>
             <div class="input-box">
-              <input
-                type="password"
-                class="input-field"
-                placeholder="Confirm Password"
-                value="{{ form.instance.confirm_password }}"
-              />
+              <input type="password" class="input-field" placeholder="Confirm Password"
+                value="{{ form.instance.confirm_password }}" />
               <i class="bx bx-lock-alt"></i>
             </div>
             <div class="input-box">
@@ -450,51 +464,58 @@
               <div class="two">
                 <label><a href="#">Terms & conditions</a></label>
               </div>
+
             </div>
+
           </div>
         </form>
-        {% endif %}
       </div>
     </div>
 
-    <script>
-      function myMenuFunction() {
-        var i = document.getElementById("navMenu");
-        if (i.className === "nav-menu") {
-          i.className += " responsive";
-        } else {
-          i.className = "nav-menu";
-        }
+  </div>
+
+
+  <script>
+    function myMenuFunction() {
+      var i = document.getElementById("navMenu");
+      if (i.className === "nav-menu") {
+        i.className += " responsive";
+      } else {
+        i.className = "nav-menu";
       }
-    </script>
-    <script>
-      var a = document.getElementById("loginBtn");
-      var b = document.getElementById("registerBtn");
-      var x = document.getElementById("login");
-      var y = document.getElementById("register");
-      function login() {
-        x.style.left = "4px";
-        y.style.right = "-520px";
-        a.className += " white-btn";
-        b.className = "btn";
-        x.style.opacity = 1;
-        y.style.opacity = 0;
-      }
-      function register() {
-        x.style.left = "-510px";
-        y.style.right = "5px";
-        a.className = "btn";
-        b.className += " white-btn";
-        x.style.opacity = 0;
-        y.style.opacity = 1;
-      }
-    </script>
-    <script>
-      function toggleForm() {
-        var form = document.getElementById("myForm");
-        form.classList.toggle("show");
-      }
-    </script>
-  </body>
+    }
+  </script>
+  <script>
+    var a = document.getElementById("loginBtn");
+    var b = document.getElementById("registerBtn");
+    var x = document.getElementById("login");
+    var y = document.getElementById("register");
+    function login() {
+      x.style.top = "450px";
+      x.style.left = "4px";
+      y.style.right = "-520px";
+      a.className += " white-btn";
+      b.className = "btn";
+      x.style.opacity = 1;
+      y.style.opacity = 0;
+    }
+    function register() {
+      x.style.top = "450px";
+      x.style.left = "-510px";
+      y.style.right = "5px";
+      a.className = "btn";
+      b.className += " white-btn";
+      x.style.opacity = 0;
+      y.style.opacity = 1;
+    }
+  </script>
+  <script>
+    function toggleForm() {
+      var form = document.getElementById("myForm");
+      form.classList.toggle("show");
+    }
+  </script>
+</body>
+
 </html>
 {% endblock %}
