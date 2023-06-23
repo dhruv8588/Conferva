@@ -1,0 +1,42 @@
+@keyframes show-toast {
+    0% {bottom: -100%}
+    20% {bottom: 100px}
+    80% {bottom: 100px}
+    100% {bottom: -100%}
+}
+
+.show-notification {
+    position: fixed;
+    bottom: 100%;
+    right: 20px;
+    animation-name: show-toast;
+    animation-duration: 5s;
+    z-index: 99;
+}
+
+.btn {
+    padding: 2px 1.75em;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* Notification button */
+
+#btn-nav {
+    float: right;
+    margin-right: 45px;
+    font-size: 20px;
+}
+
+.not_approved {
+    position: absolute;
+    border-radius: 50%;
+    font-size: 13px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    margin-top: -32px;
+    margin-left: 10px;
+    background-color: rgb(194, 163, 184);
+}

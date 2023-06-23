@@ -14,7 +14,7 @@ from django.core.exceptions import PermissionDenied
 from django.urls import resolve
 from django.utils.dateformat import DateFormat
 from django.core.paginator import Paginator
-
+from django.utils.dateformat import DateFormat
 from accounts.models import User
 from conference.models import Author, Conference, Paper
 # from .utils import send_approval_request_email
@@ -37,7 +37,11 @@ def create_conference(request):
     if request.method == 'POST':
         form = ConferenceForm(request.POST)
         if form.is_valid():
+            # form.instance.start_date = DateFormat(form.instance.start_date).format('Y-m-d')
+            # form.instance.end_date = DateFormat(form.instance.end_date).format('Y-m-d')
+            # form.instance.submission_deadline = DateFormat(form.instance.submission_deadline).format('Y-m-d')
             conference = form.save(commit=False)
+            
             conference.creator = request.user 
             conference.save()
 
@@ -49,6 +53,7 @@ def create_conference(request):
             return redirect('myAccount')
     else:
         form = ConferenceForm()
+    
     context = {
         "form": form,
     }

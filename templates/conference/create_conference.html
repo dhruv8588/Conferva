@@ -1,63 +1,149 @@
-{% extends 'base.html' %}
-{% load static %}
-{% block content %}
 
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="{% url 'js-catlog' %}"></script>
   <script src="{% static '/admin/js/core.js' %}"></script>
-  <link rel="stylesheet" href="{% static 'admin/css/base.css' %}">
+  <!-- <link rel="stylesheet" href="{% static 'admin/css/base.css' %}"> -->
   <link rel="stylesheet" href="{% static 'admin/css/widgets.css' %}">
+<!-- 
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+   <link rel="stylesheet" href="../../static/css/submit.css">
+    <!-- <link rel="stylesheet" href="../../static/css/table.css">   -->
+ 
+    <link rel="stylesheet" href="../../static/css/index.css"> 
+  <title>Conference</title>
+</head>
+<body>
+ 
+
+  <nav class="nav">
+    <div class="nav-logo">
+        <p>CONFERENCE MEET</p>
+    </div>
+    <div class="nav-menu" id="navMenu">
+        <ul>
+            <li><a href="#" class="link" >Home</a></li>
+            <li><a href="#" class="link">About</a></li>
+            <li><a href="{% url 'create_conference' %}" class="link" onclick="toggleForm()">Register for Our conference</a> </li>
+            <li><a href="{% url 'conference_listing' %}" class="link">Submit Paper</a></li>
+          
+        </ul>
+    </div>
+    <div class="nav-button">
+        <button class="btn white-btn" id="loginBtn" onclick="login()">Login</button>
+        <button class="btn" id="registerBtn" onclick="register()"> Register</button>
+    </div>
+    <div class="nav-menu-btn">
+        <i class="bx bx-menu" onclick="myMenuFunction()"></i>
+    </div>
+  </nav>
+
 
   <form action="{% url 'create_conference' %}" method="post">
     {% csrf_token %}
     {{ form.media }}
-    <div class="form-row">
-      <div class="form-group col-md-6">
-        <label>Name</label> {{ form.name }}
-      </div>
-      <div class="form-group col-md-6">
-        <label>Acronym</label> {{ form.acronym }}
-      </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6">
-          <label>Research area</label> {{ form.research_area }}
-        </div>
-        <div class="form-group col-md-6">
-          <label>Venue</label> {{ form.venue }}
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6">
-          <label>City</label> {{ form.city }}
-        </div>
-        <div class="form-group col-md-6">
-          <label>Country</label> {{ form.country }}
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6">
-          <label>Web page</label> {{ form.web_page }}
-        </div>
-        <div class="form-group col-md-6">
-          <label>Start date</label> {{ form.start_date }}
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6">
-          <label>End date</label> {{ form.end_date }}
-        </div>
-        <div class="form-group col-md-6">
-          <label>Submission deadline</label> {{ form.submission_deadline }}
-        </div>
-    </div>
 
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <div class="content-container">
+   
+      
+      <h1>Registeration Form</h1>
+  
+      <div class="form-container">
+       
+          <div class="row">
+            <div class="col-25">
+              <label for="fname">Name</label>
+            </div>
+            <div class="col-75">
+              <input type="text" id="fname" name="name" placeholder="Your Name.."  value="{{ form.instance.name }}">
+            </div>
+          </div>
+        
+         
+  
+          <div class="row">
+            <div class="col-25">
+              <label for="fname"> Acronym</label>
+            </div>
+            <div class="col-75">
+              <input type="text" id="fname" name="acronym" placeholder="Acronym.."  value="{{ form.instance.acronym }}">
+            </div>
+          </div>
+         
+          <div class="row">
+            <div class="col-25">
+              <label>Research area</label> {{ form.research_area }}
+            </div>
+        </div>
 
-    <ul class='errorList'>
+
+          <!-- <div class="row">
+            <div class="col-25">
+              <label for="fname">Web Page</label>
+            </div>
+            <div class="col-75">
+              <input type="text" id="fname" name="webpage" placeholder="Your Webpage.."  value="{{ form.instance.web_page }}">
+            </div>
+          </div> -->
+          <div class="row">
+            <div class="col-25">
+              <label for="fname">City</label>
+            </div>
+            <div class="col-75">
+              <input type="text" id="fname" name="city" placeholder="Your City.."  value="{{ form.instance.city }}">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-25">
+              <label for="fname">Venue</label>
+            </div>
+            <div class="col-75">
+              <input type="text" id="fname" name="venue" placeholder="Your Venue.."  value="{{ form.instance.venue}}">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-25">
+              <label for="fname">Country</label>
+            </div>
+            <div class="col-75">
+              <input type="text" id="fname" name="country" placeholder="Your Country.."  value="{{ form.instance.country }}">
+            </div>
+          </div>
+         
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label>Web page</label> {{ form.web_page }}
+              </div>
+              <div class="form-group col-md-6">
+                <label>Start date</label> {{ form.start_date }}
+              </div>
+          </div>
+          <div class="form-row">
+              <div class="form-group col-md-6">
+                <label>End date</label> {{ form.end_date }}
+              </div>
+              <div class="form-group col-md-6">
+                <label>Submission deadline</label> {{ form.submission_deadline }}
+              </div>
+          </div>
+        
+          <div class="row">
+            <input type="submit" value="Submit">
+          </div>
+        </div>
+     
+        
+      </div>
+      <ul class='errorList'>
         {% for field in form %}
             {% if field.errors %}
                 {% for error in field.errors %}
-                    <li style="color: red;">{{ error }}</li>
+                <li style="color: red;">{{ field }}: {{ error }}</li>
                 {% endfor %}
             {% endif %}
         {% endfor %}
@@ -71,4 +157,38 @@
         </div>
     </div>
   </form> 
-{% endblock  %}
+</body>
+</html>
+
+
+
+  
+
+    
+ 
+    
+  
+
+         
+            <!-- <div class="row">
+              <div class="col-75">
+                
+                <label>Start Date</label> 
+                <input type="date" name="startdate" value="{{ form.instance.start_date }}" >
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-75">
+                
+                <label>End Date</label>
+                <input type="date" name="enddate" value="{{ form.instance.end_date }}" >
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-75">
+                
+                <label>Submission deadline</label> 
+                <input type="date" name="enddate" value="{{ form.instance.submission_deadline }}" >
+              </div>
+            </div> -->
