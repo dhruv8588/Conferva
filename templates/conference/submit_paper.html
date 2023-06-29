@@ -1,5 +1,19 @@
 {% extends 'base.html' %}
 {% block content %}
+
+{% block css %}
+<style>
+  .container{
+    position: absolute;
+    top: 100px;
+    border: 2px solid wheat;
+  padding: 10px;
+    color: rgb(255, 255, 255);
+  }
+</style>
+{% endblock %}
+<div class="container">
+  <h1>Submit Paper</h1>
   {% include 'includes/alerts.html' %}
  
   {% if not display_add_author_model and not display_edit_author_model %}
@@ -98,6 +112,7 @@
     });
   }
 </script>
+</div>
 
 
 

@@ -1,8 +1,204 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
+<!-- <div class="inputfield">
+  <label>Start Date</label>
+    <input type="date" name="startdate"/> 
+</div> 
+<div class="inputfield">
+<label>End Date</label>
+  <input type="date" name="enddate"/> 
+</div>  -->
 
-  <script src="{% url 'js-catlog' %}"></script>
+<head>
+    
+
+    <style>
+     
+ 
+  .content-container {
+    color: #efe9e9;
+   margin:0 auto;
+ width: 100%;
+   padding-top:2%;
+   padding-right:15%;
+   padding-bottom:10%;
+   padding-left:25%;
+   max-height:100%;
+
+
+   
+ 
+  }
+  
+  
+  
+  
+  input[type=text], select, textarea {
+    width: 100%;
+    padding: 12px;
+    /* border: 1px solid #ccc; */
+    border-radius: 50px;
+    resize: vertical;
+  }
+  
+  label {
+    padding: 12px 12px 12px 0;
+    display: inline-block;
+  }
+  
+  input[type=submit] {
+    margin-top:10px;
+    background-color: #04AA6D;
+    color: rgb(27, 26, 26);
+    font-weight:bold;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    float: right;
+  }
+  
+  input[type=submit]:hover {
+    background-color: #e9c4c4;
+  }
+  input[type="file"]::file-selector-button {
+    border: 2px solid #6c5ce7;
+    padding: 0.2em 0.4em;
+    border-radius: 0.2em;
+    background-color: #a29bfe;
+    transition: 1s;
+  }
+  
+  input[type="file"]::file-selector-button:hover {
+    background-color: #81ecec;
+    border: 2px solid #00cec9;
+  }
+  
+  .form-container {
+    position: relative;
+    top: 100px;
+    border: 2px solid wheat;
+    width: 100%;
+    
+    border-radius: 10px;
+    /* background-color: #f2f2f2; */
+    
+    padding: 10px 60px;
+    margin: 20px;
+    
+     /* box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
+  }
+  
+  .col-25 {
+    float: left;
+    width: 25%;
+    margin-top: 6px;
+  }
+  
+  .col-75 {
+    float: left;
+    width: 75%;
+    margin-top: 6px;
+  }
+  
+
+  .row:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+  
+ 
+  @media screen and (max-width: 600px) {
+    .col-25, .col-75, input[type=submit] {
+      width: 100%;
+      margin-top: 0;
+    }
+    input[type=submit] {
+      margin-top: 10px;
+    }
+     }
+    </style>
+</head>
+
+    
+    <div class="content-container">
+   
+      
+     
+
+    <div class="form-container">
+      
+      <h1 style="text-align: center;">Registeration Form</h1>
+        <div class="row">
+          <div class="col-25">
+            <label for="fname">First Name</label>
+          </div>
+          <div class="col-75">
+            <input type="text" id="fname" name="name" placeholder="Your Name..">
+          </div>
+        </div>
+      
+        <div class="row">
+          <div class="col-25">
+            <label for="fname">Last Name</label>
+          </div>
+          <div class="col-75">
+            <input type="text" id="fname" name="name" placeholder="Your Name..">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-25">
+            <label for="fname"> Acronym</label>
+          </div>
+          <div class="col-75">
+            <input type="text" id="fname" name="acronym" placeholder="Acronym..">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-25">
+            <label for="fname">Email</label>
+          </div>
+          <div class="col-75">
+            <input type="text" id="fname" name="Email" placeholder="Your Email..">
+          </div>
+        </div>
+        
+        <div class="row">
+        <div class="col-75">
+          <div class="col-25">
+          <label>Start Date</label></div>
+    <input type="date" name="startdate"/> 
+        </div>
+
+      </div>
+      <div class="row">
+        <div class="col-75">
+          <div class="col-25">
+          <label>End Date</label></div>
+    <input type="date" name="enddate"/> 
+  </div>
+        </div>
+        <div class="row">
+        <div class="col-75">
+          <input type="submit" class="button-two " value="Submit">
+        </div>
+      </div>
+    </div>
+   
+    </div>
+  
+
+
+ 
+{% endblock  %}
+
+
+
+
+ <!-- <script src="{% url 'js-catlog' %}"></script>
   <script src="{% static '/admin/js/core.js' %}"></script>
   <link rel="stylesheet" href="{% static 'admin/css/base.css' %}">
   <link rel="stylesheet" href="{% static 'admin/css/widgets.css' %}">
@@ -70,5 +266,4 @@
             {% include 'includes/alerts.html' %}
         </div>
     </div>
-  </form> 
-{% endblock  %}
+  </form>  -->

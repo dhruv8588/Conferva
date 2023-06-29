@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 from decouple import config
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -32,17 +32,17 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'crispy_forms',
-    'django_extensions',
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+     'accounts.apps.AccountsConfig',
+    'conference.apps.ConferenceConfig',
 
-    'accounts',
-    'conference',
+    
 ]
 
 RISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -127,10 +127,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'static'
+STATIC_URL = '/static/'
+
 STATICFILES_DIRS = [
-    'Conferva_main/static'
+   os.path.join(BASE_DIR, 'static')
 ]
 
 # Media files configuration
@@ -157,13 +157,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # EMAIL_USE_TLS = True
 # DEFAULT_FROM_EMAIL = 'Conferva <dhruv1blue2@gmail.com>'
 
-EMAIL_PORT = 587
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = "dhruv1blue2@gmail.com"
-EMAIL_HOST_PASSWORD = "mwomvbspgpqrluiz"
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
-
-
-

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="container">
     <h4>Welcome {{ user.first_name }}</h4>
     <p>{{ user.get_role }}'s Dashboard</p>
     {% include 'includes/alerts.html' %}
@@ -86,6 +87,6 @@
       </table>
     {% endif %}
 
-
+  </div>
 
 {% endblock %}

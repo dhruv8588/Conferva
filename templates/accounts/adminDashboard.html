@@ -2,7 +2,9 @@
 
 {% block content %}
     {% include 'includes/admin_sidebar.html' %}
-    <h4>Welcome {{ user.username }}</h4>
+    <body>
+  
     <p>{{ user.get_role }}'s Dashboard</p>
+</body>
     {% include 'includes/alerts.html' %}
 {% endblock %}
