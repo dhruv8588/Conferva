@@ -27,7 +27,11 @@ def check_role_admin(user):
         return True
     else:
         raise PermissionDenied
-
+def check_role_guest(user):
+    if not user.is_admin:
+        return True
+    else:
+        raise PermissionDenied    
 def get_user(request):
     user = Conference.objects.get(user=request.user)
     return user

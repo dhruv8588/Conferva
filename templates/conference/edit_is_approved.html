@@ -1,6 +1,35 @@
-{% extends 'base.html' %}
-{% block content %}
 
+
+{% block css %}
+<style>
+    .con{
+        position: relative;
+        top:150px;
+        color: rgb(255, 255, 255);
+    justify-content: center;
+    align-items: center;
+    
+    }
+    .table{
+        color: aliceblue;
+    }
+    .table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    color: aliceblue;
+}
+.table tr td {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    color: aliceblue;
+}
+    
+</style>
+{%endblock%}
+
+{% block content %}
+{% include 'includes/admin_sidebar.html' %}
+<div class="con">
 <form action="{% url 'edit_is_approved' %}" method="post">
     {% csrf_token %}
     {{ formset.management_form }}
@@ -22,7 +51,7 @@
         <tbody>
             {% for form in formset %}
                 <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
+                    <td scope="row">{{ forloop.counter }}</td>
                     <input type="hidden" name="{{ form.prefix }}-id" value="{{ form.instance.id }}">
                     <input type="hidden" name="{{ form.prefix }}-name" value="{{ form.instance.name }}">
                     <input type="hidden" name="{{ form.prefix }}-acronym" value="{{ form.instance.acronym }}">
@@ -50,6 +79,7 @@
     </table>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form> 
+</div>
 
 {% endblock %}
 

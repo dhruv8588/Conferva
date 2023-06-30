@@ -1,10 +1,26 @@
 {% extends 'base.html' %}
-
+{% block css %}
+<style>
+    .container{
+        position: relative;
+        top:150px;
+        color: white;
+    justify-content: center;
+    align-items: center;
+    
+    }
+    .table{
+        color: aliceblue;
+        
+    }
+    
+</style>
+{%endblock%}
 {% block content %}
 <div class="container">
+
     <h4>Welcome {{ user.first_name }}</h4>
     <p>{{ user.get_role }}'s Dashboard</p>
-    {% include 'includes/alerts.html' %}
 
     {% if conferences %}
       <h3>Your created conferences:</h3>
@@ -86,7 +102,7 @@
         </tbody>
       </table>
     {% endif %}
-
   </div>
+
 
 {% endblock %}
