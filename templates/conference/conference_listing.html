@@ -1,90 +1,119 @@
 {% extends 'base.html' %}
 {% block css %}
 <style>
-    .table-container{
+    .table-container {
         position: relative;
         top: 100px;
-        min-height:300px ;
+        min-height: 300px;
         width: 100%;
         bottom: 100px;
         color: wheat;
-        background-color: rgb(247, 246, 246);
+        /* background-color: rgb(247, 246, 246); */
         padding: 50px;
-        
     }
- #no-data {
-            width: 80%;
-            position: absolute;
-            top: 150%;
-            left: 50%;
-            margin-right: -50%;
-            margin-bottom: 20px;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            font-size: 25px;
-            padding: 30px;
-        }
+
+    #no-data {
+        width: 80%;
+        position: absolute;
+        top: 150%;
+        left: 50%;
+        margin-right: -50%;
+        margin-bottom: 20px;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        font-size: 25px;
+        padding: 30px;
+    }
+
+    .table {
+        width: 100%;
+        color: #333;
+        background-color: #fff;
+        border-collapse: collapse;
+    }
+
+    .table thead th {
+        background-color: #428bca;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .table tbody tr:nth-child(odd) {
+        background-color: #f5f9fc;
+    }
+
+    .table tbody tr:hover {
+        background-color: #d8e7f3;
+    }
+
+    .table td, .table th {
+        padding: 0.5em;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .input-group {
+        margin-bottom: 10px;
+    }
+
+    .form-control {
+        width: 300px;
+        display: inline-block;
+    }
+
+    .btn {
+        margin-left: 10px;
+    }
+
 </style>
+{% endblock %}
 
-{%endblock%}
 {% block content %}
-
 <div class="table-container">
-<div class="row">
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-       
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        </div>
     </div>
-</div>
-<div class="input-group input-group-sm mb-3 mt-2">
-    <input type="text" onkeyup="searchFunction()" class="form-control" id="search" placeholder="Search for...">
-    <a href="{% url 'conference_listing' %}" class="btn btn-dark"><i class="fas fa-sync-alt"></i></a>
-    {% comment %} <button type="reset" class="btn btn-outline-dark mb-3 ms-2" style="width: 50px;"><i
-            class="fas fa-sync-alt"></i></button> {% endcomment %}
-    <table class="table" id="myTable">
-        <thead>
-            <tr id="chk-th">
-                <th scope="col">#</th>
-                <th scope="col">Name</th>
-                <th scope="col">Acronym</th>
-                <th scope="col">Research area</th>
-                <th scope="col">Where</th>
-                <th scope="col">Start date</th>
-                <th scope="col">End date</th>
-                <th scope="col">Submission Deadline</th>
-                <th scope="col">Link to submit</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for conference in conferences %}
-            <tr>
-                <th scope="row">{{ forloop.counter }}</th>
-                <td>{{ conference.name }}</td>
-                <td>{{ conference.acronym }}</td>
-                <td>{{ conference.research_area }}</td>
-                <td>{{ conference.venue }}, {{ conference.city }}, {{ conference.country }}</td>
-                <td>{{ conference.start_date }}</td>
-                <td>{{ conference.end_date }}</td>
-                <td>{{ conference.submission_deadline }}</td>
-                <td>
-                    {% if conference.submission_deadline >= today %}
-                    <a href="{% url 'submit_paper' conference.id %}">Submit</a>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <br /><br />
-    {% comment %} {{ page_obj }}<br />
-    has next {{ page_obj.has_next }}<br />
-    has previous {{ page_obj.has_previous }}<br />
-    current page {{ page_obj.number }}<br />
-    no. of pages {{ page_obj.paginator.num_pages }}<br /> {% endcomment %}
-
-
-    <span class="text-danger" id="no-data"></span>
-</div>
+    <div class="input-group input-group-sm mb-3 mt-2">
+        <input type="text" onkeyup="searchFunction()" class="form-control" id="search" placeholder="Search for...">
+        <a href="{% url 'conference_listing' %}" class="btn btn-dark"><i class="fas fa-sync-alt"></i></a>
+        <table class="table" id="myTable">
+            <thead>
+                <tr id="chk-th">
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Acronym</th>
+                    <th scope="col">Research area</th>
+                    <th scope="col">Where</th>
+                    <th scope="col">Start date</th>
+                    <th scope="col">End date</th>
+                    <th scope="col">Submission Deadline</th>
+                    <th scope="col">Link to submit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for conference in conferences %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ conference.name }}</td>
+                    <td>{{ conference.acronym }}</td>
+                    <td>{{ conference.research_area }}</td>
+                    <td>{{ conference.venue }}, {{ conference.city }}, {{ conference.country }}</td>
+                    <td>{{ conference.start_date }}</td>
+                    <td>{{ conference.end_date }}</td>
+                    <td>{{ conference.submission_deadline }}</td>
+                    <td>
+                        {% if conference.submission_deadline >= today %}
+                        <a href="{% url 'submit_paper' conference.id %}">Submit</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br /><br />
+        <span class="text-danger" id="no-data"></span>
+    </div>
     <script>
         function searchFunction() {
             let input, filter, table, tr, td, j;
@@ -107,8 +136,7 @@
                         td[6].innerHTML.toLocaleUpperCase().indexOf(filter) > -1) {
                         tr[j].style.display = "";
                         msg.innerHTML = "";
-                    }
-                    else {
+                    } else {
                         tr[j].style.display = "none";
                     }
                 }
@@ -118,6 +146,5 @@
             }
         }
     </script>
-
-    
-    {% endblock %}
+</div>
+{% endblock %}

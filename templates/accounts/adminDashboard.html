@@ -1,22 +1,38 @@
+{% load static %}
 {% block css %}
 <style>
     /* Content Styles */
+    body{
+      background-image: url('{% static "images/conference.jpg" %}');
+      background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
     .content {
-        margin-top: 20%;
+        
       margin-right: 700px; /* Adjust the margin to match the sidebar width */
      
       padding: 20px;
     }
+    .dash h1{
+      text-align: center;
+      color: aliceblue;
+    }
 </style>
 {%endblock%}
 {% block content %}
-
+<body>
     {% include 'includes/admin_sidebar.html' %}
     
-    <div class="content">
+    <div class="dash">
+   <h1>
         {{ user.get_role }}'s Dashboard
-       
-      </div>
+        <h1>Welcome to the Admin Dashboard</h1>
+    
+      </h1>
+     
+    </div>
+    </body>
     
     
 
