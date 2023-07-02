@@ -1,4 +1,24 @@
 <!-- Modal -->
+<style>
+  .modal-title {
+    color:black;
+    margin-bottom: 0;
+    line-height: 1.5;
+}
+  
+  .container label {
+   color:black;
+}
+.container input[type="text"], .container textarea {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+    border:2px solid black;
+    border-radius: 5px;
+}
+</style>
+<div class="cont">
 <div class="modal fade" {% block modal-id %} id="add_author_modal" {% endblock modal-id %} tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -44,6 +64,8 @@
     </div>
   </div>
 </div>
+</div>
+
 
 {% block js %}
 <script>

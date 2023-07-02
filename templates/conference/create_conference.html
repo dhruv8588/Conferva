@@ -1,8 +1,221 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block content %}
 
-  <script src="{% url 'js-catlog' %}"></script>
+<!-- <div class="inputfield">
+  <label>Start Date</label>
+    <input type="date" name="startdate"/> 
+</div> 
+<div class="inputfield">
+<label>End Date</label>
+  <input type="date" name="enddate"/> 
+</div>  -->
+
+{% block css %}
+    
+
+    <style>
+     
+ 
+  .content-container {
+    color: #efe9e9;
+   /* margin:0 auto; */
+    max-width: 100%;
+   
+   
+  
+
+
+   
+ 
+  }
+  
+  
+  
+  
+  input[type=text], select, textarea {
+    width: 100%;
+    padding: 12px;
+    /* border: 1px solid #ccc; */
+    border-radius: 10px;
+    resize: vertical;
+  }
+  
+  label {
+    padding: 12px 12px 12px 0;
+    display: inline-block;
+  }
+  
+  .btn1 {
+    margin-top:10px;
+    width: 50%;
+    background-color: #04AA6D;
+    color: rgb(27, 26, 26);
+    font-weight:bold;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    float:none;
+  }
+  
+  .btn:hover {
+    background-color: #e9c4c4;
+  }
+  input[type="file"]::file-selector-button {
+    border: 2px solid #6c5ce7;
+    padding: 0.2em 0.4em;
+    border-radius: 0.2em;
+    background-color: #a29bfe;
+    transition: 1s;
+  }
+  
+  input[type="file"]::file-selector-button:hover {
+    background-color: #81ecec;
+    border: 2px solid #00cec9;
+  }
+  
+  .form-container {
+    position: relative;
+    top: 100px;
+    border: 2px solid wheat;
+    max-width: 100%;
+    
+    border-radius: 10px;
+    /* background-color: #f2f2f2; */
+    
+    padding: 10px 60px;
+    margin: 20px;
+    
+     /* box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
+  }
+  
+  .col-25 {
+    float: left;
+    width: 25%;
+    margin-top: 6px;
+    padding-left: 20px;
+  }
+  
+  .col-75 {
+    float: left;
+    width: 75%;
+    margin-top: 6px;
+  }
+  
+
+  .row:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+  
+ 
+  @media screen and (max-width: 600px) {
+    .col-25, .col-75, input[type=submit] {
+      width: 100%;
+      margin-top: 0;
+    }
+    input[type=submit] {
+      margin-top: 10px;
+    }
+     }
+     .btn{
+      background-color: wheat;
+     }
+    </style>
+
+    {%endblock%}
+{% block content %}
+<div class="content-container">
+  
+  
+    <form action="{% url 'create_conference' %}" method="post" class="form-container">
+      <h1>Create Conference</h1>
+      {% csrf_token %}
+      {{ form.media }}
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label>Name</label> {{ form.name }}
+        </div>
+        <div class="form-group col-md-6">
+          <label>Acronym</label> {{ form.acronym }}
+        </div>
+      </div>
+      <div class="form-row">
+          <div class="form-group col-md-6">
+            <label>Research area</label> {{ form.research_area }}
+          </div>
+          <div class="form-group col-md-6">
+            <label>Venue</label> {{ form.venue }}
+          </div>
+      </div>
+      <div class="form-row">
+          <div class="form-group col-md-6">
+            <label>City</label> {{ form.city }}
+          </div>
+          <div class="form-group col-md-6">
+            <label>Country</label> {{ form.country }}
+          </div>
+      </div>
+      <div class="form-row">
+          <div class="form-group col-md-6">
+            <label>Web page</label> {{ form.web_page }}
+          </div>
+          <div class="form-group col-md-6">
+            <label>Start date</label> 
+            <div class="input-box">
+              <input type="date" class="input-field" name="start_date" >
+              <i class="bx bx-envelope"></i>
+          </div>
+         
+          </div>
+      </div>
+      <div class="form-row">
+          <div class="form-group col-md-6">
+            <label>End date</label>
+            <div class="input-box">
+              <input type="date" class="input-field" name="end_date" >
+              <i class="bx bx-envelope"></i>
+          </div>
+          </div>
+          <div class="form-group col-md-6">
+            <label>Submission deadline</label> 
+            <div class="input-box">
+              <input type="date" class="input-field" name="submission_deadline"  placeholder="Username">
+              <i class="bx bx-envelope"></i>
+          </div>
+            
+          </div>
+      </div>
+  
+      <button type="submit" class="btn1 btn-primary">Submit</button>
+  
+      <ul class='errorList'>
+          {% for field in form %}
+              {% if field.errors %}
+                  {% for error in field.errors %}
+                      <li style="color: red;">{{ error }}</li>
+                  {% endfor %}
+              {% endif %}
+          {% endfor %}
+      </ul>  
+  
+      <li style="color: red;">{{ form.non_field_errors }}</li>
+  
+      <div class="row">
+          <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+             
+          </div>
+      </div>
+    </form>
+  </div>
+ 
+{% endblock  %}
+
+
+
+
+ <!-- <script src="{% url 'js-catlog' %}"></script>
   <script src="{% static '/admin/js/core.js' %}"></script>
   <link rel="stylesheet" href="{% static 'admin/css/base.css' %}">
   <link rel="stylesheet" href="{% static 'admin/css/widgets.css' %}">
@@ -67,8 +280,7 @@
 
     <div class="row">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            {% include 'includes/alerts.html' %}
+           
         </div>
     </div>
-  </form> 
-{% endblock  %}
+  </form>  -->
