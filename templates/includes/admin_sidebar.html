@@ -1,103 +1,162 @@
-
-
 {% block css %}
 <style>
-
-    /* Sidebar Styles */
-    .container {
-      width: 200px; /* Adjust the width as needed */
-      background-color: #2b0909;
-      height: 100%; /* Make the sidebar fill the entire height of the page */
-      position: fixed;
-      top: 0;
-      left: 0;
-      overflow-x: hidden;
-      padding-top: 20px;
-      z-index: 10;
-    }
-
-    .container ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    .container ul li {
-      padding: 10px;
-      border-bottom: 1px solid #f6f6f6;
-      color: white;
-    }
-
-    .container ul li:last-child {
-      border-bottom: none;
-    }
-
-    .container ul li a {
-      text-decoration: none;
-      color: #efdfdf;
-    }
-
-    .container ul li:hover {
-      background-color: #f4eeee;
-    }
-
-    /* Content Styles */
-    .con {
-      margin-left: 200px; /* Adjust the margin to match the sidebar width */
-      padding: 20px;
-    }
-    .nav-button .btn {
-    width: 130px;
-    height: 40px;
-    font-weight: 500;
-    background: rgba(255, 255, 255, 0.4);
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: .3s ease;
-    margin: 5px;
-    padding: 10px;
-}
-
-#registerBtn {
-    margin-left: 15px;
-}
-
-.btn.white-btn {
-    background: rgba(255, 255, 255, 0.7);
-}
-
-.btn.btn.white-btn:hover {
-    background: rgba(255, 255, 255, 0.5);
-}
-.tag{
-  color:white;
-  text-align: center;
-  margin-bottom: 30px;
-}
-
+  body {
+    overflow-x: hidden;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+  }
+  
+  /* Toggle Styles */
+  
+  #viewport {
+    padding-left: 250px;
+    transition: all 0.5s ease;
+  }
+  
+  #content {
+    width: 100%;
+    position: relative;
+    margin-right: 0;
+  }
+  
+  /* Sidebar Styles */
+  
+  #sidebar {
+    z-index: 1000;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 250px;
+    height: 100vh;
+    overflow-y: auto;
+    background: #37474F;
+    transition: all 0.5s ease;
+  }
+  
+  #sidebar header {
+    background-color: #263238;
+    font-size: 20px;
+    line-height: 52px;
+    text-align: center;
+  }
+  
+  #sidebar header a {
+    color: #fff;
+    display: block;
+    text-decoration: none;
+  }
+  
+  #sidebar header a:hover {
+    color: #fff;
+  }
+  
+  #sidebar .nav {
+    margin-top: 20px;
+    padding: 0;
+    list-style: none;
+  }
+  
+  #sidebar .nav li {
+    margin-bottom: 1px;
+  }
+  
+  #sidebar .nav a {
+    background: none;
+    border-bottom: 1px solid #455A64;
+    color: #CFD8DC;
+    font-size: 14px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+  }
+  
+  #sidebar .nav a:hover {
+    background-color: #455A64;
+    color: #ECEFF1;
+  }
+  
+  #sidebar .nav a i {
+    margin-right: 16px;
+  }
+  
+  /* Content Styles */
+  
+  .container-fluid {
+    padding: 20px;
+  }
+  
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  p {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  
+  /* Navbar Styles */
+  
+  .navbar {
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+  }
+  
+  .navbar-default .navbar-nav > li > a {
+    color: #555;
+    font-weight: bold;
+  }
+  
+  .navbar-default .navbar-nav > li > a:hover,
+  .navbar-default .navbar-nav > li > a:focus {
+    background-color: transparent;
+    color: #333;
+  }
+  
+  .navbar-default .navbar-right > li > a {
+    padding: 15px;
+  }
+  
+  .navbar-default .navbar-right > li > a:hover,
+  .navbar-default .navbar-right > li > a:focus {
+    background-color: #f8f8f8;
+  }
+  
+  .navbar-default .navbar-right > li > a i {
+    font-size: 20px;
+    color: #999;
+  }
+  
 </style>
+{% endblock %}
 
-{%endblock%}
 {% block content %}
-<div class="container">
-    
-    <ul class="list-unstyled">
-      <div class="tag">Admin Sidebar</div>
-      <li><a href="{% url 'edit_is_approved' %}">Conference Approval</a></li>
-      <li>About</li>
-      <li>Services</li>
-      <li>Contact</li>
-      <div >
-        <li><a  href="{% url 'myAccount' %}">My Account</a></li>
-        <!-- <button class="btn white-btn" id="loginBtn" onclick="login()">Sign In</button> -->
-        <li><a href="{% url 'logout' %}">Logout</a></li>
-        <!-- <button class="btn" id="registerBtn" onclick="register()"> Sign Up</button> -->
-    </div>
+<div id="viewport">
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <header>
+      <a href="#">Admin</a>
+    </header>
+    <ul class="nav">
+      <li>
+        <a href="{% url 'edit_is_approved' %}">
+          <i class="zmdi zmdi-view-dashboard"></i>Conference Approval
+        </a>
+      </li>
+      <li>
+        <a href="#"> <i class="zmdi zmdi-link"></i> About </a>
+      </li>
+
+      <li>
+        <a href="{% url 'myAccount' %}"> <i class="zmdi zmdi-settings"></i> My Account </a>
+      </li>
+      <li>
+        <a href="{% url 'logout' %}"> <i class="zmdi zmdi-comment-more"></i> LogOut </a>
+      </li>
     </ul>
   </div>
-  
-  
-
-
-  {% endblock %}
+  </div>
+{% endblock %}

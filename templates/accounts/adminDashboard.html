@@ -8,29 +8,37 @@
         background-repeat: no-repeat;
         background-attachment: fixed;
     }
-    .content {
-        
-      margin-right: 700px; /* Adjust the margin to match the sidebar width */
-     
-      padding: 20px;
+  
+    #content {
+      width: 100%;
+      font-size: 50px;
+      position: relative;
+      margin-right: 0;
     }
-    .dash h1{
-      text-align: center;
+    
+.container-fluid {
+  padding: 20px;
+}
+
+.container-fluid h1 {
+  font-size: 44px;
+  margin-bottom: 20px;
+  text-align: center;
       color: aliceblue;
-    }
+}
 </style>
 {%endblock%}
 {% block content %}
 <body>
     {% include 'includes/admin_sidebar.html' %}
     
-    <div class="dash">
-   <h1>
-        {{ user.get_role }}'s Dashboard
-        <h1>Welcome to the Admin Dashboard</h1>
-    
-      </h1>
-     
+    <div id="content">
+
+      <div class="container-fluid">
+        <h1> {{ user.get_role }}'s Dashboard
+          <h1>Welcome to the Admin Dashboard</h1></h1>
+       
+      </div>
     </div>
     </body>
     
