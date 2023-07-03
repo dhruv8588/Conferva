@@ -4,6 +4,7 @@ from django.contrib import messages, auth
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
+from django.contrib.sessions.models import Session
 
 from conference.models import Conference, Paper
 
@@ -82,6 +83,16 @@ def login(request):
         if user is not None:
             auth.login(request, user)
             messages.success(request, 'You are now logged in.')
+
+            current_session_key = user.logged_in_user.session_key
+
+            if current_session_key and current_session_key != request.session.session_key:
+                Session.objects.get(session_key=current_session_key).delete() 
+
+            user.logged_in_user.session_key = request.session.session_key
+            user.logged_in_user.save()
+
+
             return redirect('myAccount')
         else:
             messages.error(request, 'Invalid login credentials')

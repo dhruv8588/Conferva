@@ -25,7 +25,7 @@
         </tr>
         </thead>
         <tbody>
-            {% for conference in conferences %}
+            {% for conference in page_obj %}
                 <tr>
                     <th scope="row">{{ forloop.counter }}</th>
                     <td>{{ conference.name }}</td>
@@ -45,16 +45,91 @@
         </tbody>
     </table>
 
-    <br/><br/>
-    {% comment %} {{ page_obj }}<br/>
-    has next {{ page_obj.has_next }}<br/>
-    has previous {{ page_obj.has_previous }}<br/>
-    current page {{ page_obj.number }}<br/>
-    no. of pages {{ page_obj.paginator.num_pages }}<br/> {% endcomment %}
+    {% comment %} <br/><br/>
+    {{ page_obj }}<br/>
+    has next: {{ page_obj.has_next }}<br/>
+    has previous: {{ page_obj.has_previous }}<br/>
+    current page: {{ page_obj.number }}<br/>
+    no. of pages: {{ page_obj.paginator.num_pages }}<br/>
 
+    <br/><hr/><br/> {% endcomment %}
+
+    {% comment %} <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">&laquo First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+                <a href="#" class="page-link">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </a>    
+            </li>
+
+            {% for page in page_obj.paginator.page_range %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page }}">
+                        {{ page }}
+                    </a>
+                </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                <li class="page-item">    
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo</a>
+                </li>
+            {% endif %}        
+        </ul>
+    </nav>  {% endcomment %}
+
+    <nav class="mt-4">
+        {% if page_obj.has_other_pages %}
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="btn btn-outline-secondary mb-4">First</a>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}"><i class="fas fa-angle-double-left"></i></a></li>
+            {% else %}
+                <li class="page-item disabled"></li>    
+            {% endif %}
+    
+            {% if pages_obj.number|add:'-2' > 1 %}
+                <li><a class='page-link' href="?page={{ page_obj.number|add:'-2' }}">&hellip;</a></li>
+            {% endif %}
+    
+            {% for i in page_obj.paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}<span class="sr-only"></span></span></li>
+                {% elif i > page_obj.number|add:'-2' and i < page_obj.number|add:'2' %}
+                    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.paginator.num_pages > page_obj.number|add:'2' %}
+                <li><a class="page-link" href="?page={{ page_obj.number|add:'-2' }}">&hellip;</a></li>
+                <li><a href="?page={{ i }}">{{ i }}</a></li>
+                <li><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a></li>
+            {% endif %}
+        
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="fas fa-angle-double-right"></i></a></li>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-secondary mb-4">Last</a>
+            {% else %}
+                <li class="page-item disabled"></li>        
+            {% endif %}
+        </ul>
+        {% endif %}
+    </nav>
 
     <span class="text-danger" id="no-data"></span>
-
+ 
     <script>
         function searchFunction() {
             let input, filter, table, tr, td, j;
@@ -101,4 +176,6 @@
             font-size: 25px;
         }
     </style>    
-{% endblock %}
+
+    {% endblock %}
+

@@ -2,28 +2,22 @@
 {% block content %}
   {% include 'includes/alerts.html' %}
  
-  {% if not display_add_author_model and not display_edit_author_model %}
-    {% block action %} 
+  {% if not display_add_author_modal and not display_edit_author_modal %}
       {% if paper %}  
         <form id="submit-paper-form" action="{% url 'submit_paper' conference_id paper.id %}" method="post" enctype="multipart/form-data">
       {% else %}
         <form action="{% url 'submit_paper' conference_id %}" method="post" enctype="multipart/form-data">
-      {% endif %} 
-    {% endblock %}   
+      {% endif %}   
   {% endif %}
 
     {% csrf_token %}
 
-    {% if display_add_author_model %}
-      {% block add_author_modal %}
+    {% if display_add_author_modal %}
         {% include 'conference/add_author.html' %}
-      {% endblock %}  
     {% endif %}
 
-    {% if display_edit_author_model %}
-      {% block edit_author_modal %}
+    {% if display_edit_author_modal %}
         {% include 'conference/edit_author.html' %}
-      {% endblock edit_author_modal %}  
     {% endif %}
 
     <div class="form-row">
@@ -51,7 +45,7 @@
       {% endif %}
     {% endif %}
     
-    <button type="submit" name={% block add-author-btn-name %}"add_author"{% endblock %} class="btn btn-dark">Add Author</button>
+    <button type="submit" name="add_author" class="btn btn-dark">Add Author</button>
 
     <div class="form-row">
       <div class="form-group col-md-6">
@@ -66,9 +60,9 @@
         </div>
     </div>
   
-    <button type="submit" name="submit_paper" class="btn btn-dark mb-3">{% block action-btn-text %}Submit Paper{% endblock %}</button>
+    <button type="submit" name="submit_paper" class="btn btn-dark mb-3">Submit Paper</button>
      
-    <a href={% block back-btn-link %}"{% url 'conference_listing' %}"{% endblock %} class="btn btn-outline-dark mb-3 ms-2" style="width: 75px;"><i class="fas fa-chevron-left"></i> Back</a>
+    <a href="{% url 'conference_listing' %}" class="btn btn-outline-dark mb-3 ms-2" style="width: 75px;"><i class="fas fa-chevron-left"></i> Back</a>
 
     <button type="reset" class="btn btn-outline-dark mb-3 ms-2" style="width: 50px;"><i class="fas fa-sync-alt"></i></button>
     

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="{% static 'admin/css/base.css' %}">
   <link rel="stylesheet" href="{% static 'admin/css/widgets.css' %}">
 
-  <form action="{% url 'create_conference' %}" method="post">
+  <form action="{% url 'edit_conference' conference_id %}" method="post">
     {% csrf_token %}
     {{ form.media }}
     <div class="form-row">
@@ -51,7 +51,7 @@
         </div>
     </div>
 
-    <button type="submit" class="btn btn-dark mb-3">Create</button>
+    <button type="submit" class="btn btn-dark mb-3">Save Changes</button>
 
     <button type="reset" class="btn btn-outline-dark mb-3 ms-2" style="width: 50px;"><i class="fas fa-sync-alt"></i></button>
 

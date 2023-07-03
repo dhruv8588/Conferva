@@ -2,3 +2,4 @@ Django==4.0.3
 Pillow==8.4.0
 python-decouple==3.5
 psycopg2-binary
+django-extensions==3.2.3

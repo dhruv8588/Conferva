@@ -16,10 +16,10 @@ from django.utils.dateformat import DateFormat
 from django.core.paginator import Paginator
 
 from accounts.models import User
-from conference.models import Author, Conference, Paper
+from conference.models import Author, Conference, Paper, Reviewer
 # from .utils import send_approval_request_email
 
-from .forms import AuthorForm, ConferenceForm, ConferenceModelFormset, PaperForm
+from .forms import AuthorForm, ConferenceForm, ConferenceModelFormset, PaperForm, ReviewerForm
 from conference import forms
 
 def check_role_admin(user):
@@ -31,6 +31,57 @@ def check_role_admin(user):
 def get_user(request):
     user = Conference.objects.get(user=request.user)
     return user
+
+def edit_conference(request, conference_id):
+    conference = Conference.objects.get(id=conference_id)
+    if request.method == 'POST':
+        form = ConferenceForm(request.POST, instance=conference)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Conference updated successfully!')
+            return redirect('myAccount')
+        else:
+            print(form.errors)
+    else:
+        form = ConferenceForm(instance=conference)
+    context = {
+        "form": form,
+        'conference_id': conference_id,
+    }                
+    return render(request, 'conference/edit_conference.html', context)
+
+def delete_conference(request, conference_id):
+    papers = Paper.objects.filter(conference=conference_id)
+    for paper in papers:
+        ps = Paper.objects.exclude(id=paper.id)
+
+        authors = paper.authors.all()
+        flag = 0
+        for author in authors:
+            for p in ps:
+                if author in p.authors.all():
+                    flag = 1
+                    break
+            if flag == 0:
+                author.delete()
+        
+        reviewers = paper.reviewers.all()
+        flag = 0
+        for reviewer in reviewers:
+            for p in ps:
+                if reviewer in p.reviewers.all():
+                    flag = 1
+                    break
+            if flag == 0:
+                reviewer.delete()    
+
+        paper.delete()
+
+    conference = Conference.objects.get(id=conference_id)
+    conference.delete()
+    messages.success(request, 'Conference has been deleted successfully!')    
+
+    return redirect('myAccount')
 
 @login_required(login_url='login')
 def create_conference(request):
@@ -59,14 +110,14 @@ def conference_listing(request):
     conferences = Conference.objects.filter(is_approved=True).order_by('created_at')
     today = date.today()
 
-    # paginator = Paginator(conferences, 2)
-    # page_number = request.GET.get('page')
-    # page_obj = paginator.get_page(page_number)
+    paginator = Paginator(conferences, 1)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     context = {
         "conferences": conferences,
         "today": today,
-        # "page_obj": page_obj,
+        "page_obj": page_obj,
     }
     return render(request, 'conference/conference_listing.html', context)
 
@@ -87,7 +138,6 @@ def delete_author(request, conference_id, paper_id, author_id):
         if author in paper.authors.all():
             return x
 
-    author = get_object_or_404(Author, id=author_id)
     author.delete()
     return x
     
@@ -101,7 +151,7 @@ def edit_author(request, conference_id, paper_id, author_id):
 
     paper = get_object_or_404(Paper, id=paper_id)
     form = PaperForm(instance=paper)
-    display_edit_author_model = True
+    display_edit_author_modal = True
 
     author = get_object_or_404(Author, id=author_id)
     if request.method == 'POST':
@@ -163,10 +213,11 @@ def edit_author(request, conference_id, paper_id, author_id):
             print(aform.errors)
     else:
         aform = AuthorForm(instance=author)
+        
 
     context = {
         "aform": aform,
-        "display_edit_author_model": display_edit_author_model,
+        "display_edit_author_modal": display_edit_author_modal,
         "form": form,
         "conference_id": conference_id,
         "paper": paper,
@@ -187,7 +238,7 @@ def add_author(request, conference_id, paper_id):
         
     paper = get_object_or_404(Paper, id=paper_id)
     form = PaperForm(instance=paper)
-    display_add_author_model = True 
+    display_add_author_modal = True 
     if request.method == 'POST':
         aform = AuthorForm(request.POST)
         if aform.is_valid(): 
@@ -224,7 +275,7 @@ def add_author(request, conference_id, paper_id):
               
     context = {
         "aform": aform,
-        "display_add_author_model": display_add_author_model,
+        "display_add_author_modal": display_add_author_modal,
         "form": form,
         "conference_id": conference_id,
         "paper": paper,
@@ -269,6 +320,14 @@ def submit_paper(request, conference_id, paper_id=None, author_id=None):
                     if author.user == request.user:
                         if author in paper.authors.all():
                             paper.authors.remove(author.id)
+
+                            flag = 0
+                            papers = Paper.objects.exclude(id=paper.id)
+                            for paper in papers:
+                                if author in paper.authors.all():
+                                       flag = 1 
+                            if flag == 0:
+                                author.delete()           
                             break
 
             paper.submitter = request.user
@@ -276,34 +335,43 @@ def submit_paper(request, conference_id, paper_id=None, author_id=None):
             paper.save()
 
             action = request.GET.get('action')
-            if action == 'edit_author':
+            if action == 'edit_author': # submit paper
                 return redirect('edit_author', conference_id, paper.id, author_id)
-            elif action == 'delete_author':
+            elif action == 'delete_author': # submit paper
                 return redirect('delete_author', conference_id, paper.id, author_id)
-            elif 'add_author' in request.POST:
+            elif action == 'edit_paper_edit_author':
+                return redirect('edit_paper_edit_author', conference_id, paper.id, author_id)
+            elif action == 'edit_paper_delete_author':
+                return redirect('edit_paper_delete_author', conference_id, paper.id, author_id)
+            
+            if 'add_author' in request.POST: # submit paper
                 return redirect('add_author', conference_id, paper.id)
             elif 'edit_paper_add_author' in request.POST:
                 return redirect('edit_paper_add_author', conference_id, paper.id)
-            # elif 'edit_paper_edit_author' in request.POST:
-            #     return redirect('edit_paper_edit_author', conference_id, paper.id, author_id)
-            elif 'submit_paper' in request.POST:
+            elif 'edit_paper' in request.POST:
+                return redirect('edit_paper', conference_id, paper.id)
+            elif 'submit_paper' in request.POST: # submit paper
                 file_hash = hashlib.md5(paper.file.read()).hexdigest() if paper.file else None
-                paper.file_hash = file_hash
-                paper.save()
-
                 if file_hash:
                     submitted_papers_with_same_file = Paper.objects.filter(Q(file_hash=file_hash) & ~Q(id=paper.id))
                     if submitted_papers_with_same_file:
                         for submitted_paper in submitted_papers_with_same_file:
                             if submitted_paper.conference==conference:
+                                paper.file = None
+                                paper.save()
                                 messages.error(request, 'This paper has already been submitted to this conference!')
-                                return redirect('submit_paper', conference_id, paper.id)
+                                if url_name == 'submit_paper':
+                                    return redirect('submit_paper', conference_id, paper.id)
+                                elif url_name == 'edit_paper':
+                                    return redirect('edit_paper', conference_id, paper.id)
+                paper.file_hash = file_hash               
+                paper.save()
 
-                if url_name == 'submit_paper':
-                    messages.success(request, 'Paper submitted successfully!')
-                elif url_name == 'edit_paper':
-                    messages.success(request, 'Paper edited successfully!')
-                return redirect('myAccount')
+            if url_name == 'submit_paper':        
+                messages.success(request, 'Paper submitted successfully!')
+            elif url_name == 'edit_paper':
+                messages.success(request, 'Paper edited successfully!')
+            return redirect('myAccount')
         else:
             print(form.errors)         
     else:
@@ -322,8 +390,9 @@ def submit_paper(request, conference_id, paper_id=None, author_id=None):
 def withdraw_paper(request, paper_id):
     paper = get_object_or_404(Paper, id=paper_id)
 
-    authors = paper.authors.all()
     papers = Paper.objects.exclude(id=paper_id)
+
+    authors = paper.authors.all()
     flag = 0
     for author in authors:
         for paper in papers:
@@ -333,6 +402,16 @@ def withdraw_paper(request, paper_id):
         if flag == 0:
             author.delete()
       
+    reviewers = paper.reviewers.all()
+    flag = 0
+    for reviewer in reviewers:
+        for paper in papers:
+            if reviewer in paper.reviewers.all():
+                flag = 1
+                break
+        if flag == 0:
+            reviewer.delete()    
+
     paper.delete()
     messages.success(request, 'Paper has been deleted successfully!')            
     return redirect('myAccount')
@@ -366,6 +445,159 @@ def edit_is_approved(request):
         'formset': formset,
     }
     return render(request, 'conference/edit_is_approved.html', context)
+
+def view_papers(request, conference_id):
+    papers = Paper.objects.filter(conference=conference_id).order_by('created_at')
+    conference = Conference.objects.get(id = conference_id)
+    context = {
+        "papers": papers,
+        "conference": conference,
+    } 
+    return render(request, 'conference/view_papers.html', context)
+
+def edit_reviewer(request, conference_id, paper_id, reviewer_id):
+    papers = Paper.objects.filter(conference=conference_id).order_by('created_at')
+    conference = Conference.objects.get(id = conference_id)
+    
+    target_paper = Paper.objects.get(id=paper_id)
+    display_edit_reviewer_modal = True
+
+    reviewer = get_object_or_404(Reviewer, id=reviewer_id)
+    if request.method == 'POST':
+        form = ReviewerForm(request.POST, instance=reviewer)
+        if form.is_valid():
+            # code starts here
+            entered_email = reviewer.email.lower()
+            orig = Reviewer.objects.get(id=reviewer_id)
+            if entered_email != orig.email:
+                flag = 0
+                other_reviewers = Reviewer.objects.exclude(id=orig.id)
+                for other_reviewer in other_reviewers:
+                    if other_reviewer.email == entered_email:
+                        target_paper.reviewers.add(other_reviewer.id)
+                        other_reviewer.first_name = reviewer.first_name #
+                        other_reviewer.last_name = reviewer.last_name #
+                        other_reviewer.save() #
+                        target_paper.reviewers.remove(orig.id)
+                        flag = 1
+                if flag==1:
+                    delete_orig = True
+                    other_papers = Paper.objects.exclude(id=paper_id)
+                    for other_paper in other_papers:
+                        if orig in other_paper.reviewers.all():
+                            delete_orig = False
+                            return redirect('view_papers', conference_id)
+                    if delete_orig == True:
+                        orig.delete()
+                        return redirect('view_papers', conference_id)  
+                elif flag == 0:
+                    flag2 = 0
+                    other_papers = Paper.objects.exclude(id=paper_id)
+                    for other_paper in other_papers:
+                        if orig in other_paper.reviewers.all():
+                            target_paper.reviewers.remove(orig.id)
+                            # create a new reviewer object with a different id and the field values of reviewer object
+                            new_reviewer = Reviewer.objects.create(
+                                first_name = reviewer.first_name,
+                                last_name = reviewer.last_name,
+                                email = reviewer.email
+                            )
+                            users = User.objects.all()
+                            for user in users:
+                                if user.email == new_reviewer.email:
+                                    new_reviewer.user = user
+                                    break
+                            new_reviewer.save()
+                            target_paper.reviewers.add(new_reviewer.id)
+                            flag2 = 1
+                    if flag2 == 0:
+                        reviewer.save()
+                    return redirect('view_papers', conference_id)          
+            else:
+                orig.first_name = reviewer.first_name #
+                orig.last_name = reviewer.last_name #
+                orig.save() #
+                return redirect('view_papers', conference_id)
+        else:
+            print(form.errors)
+    else:
+        form = ReviewerForm(instance=reviewer)
+    context = {
+        'papers': papers,
+        'conference': conference,
+        'form': form,
+        'target_paper': target_paper,
+        'display_edit_reviewer_modal': display_edit_reviewer_modal,
+        'reviewer_id': reviewer_id
+    }
+    return render(request, 'conference/view_papers.html', context)       
+
+
+def add_reviewer(request, conference_id, paper_id):
+    papers = Paper.objects.filter(conference=conference_id).order_by('created_at')
+    conference = Conference.objects.get(id = conference_id)
+    
+    target_paper = Paper.objects.get(id=paper_id)
+    display_add_reviewer_modal = True
+    if request.method == 'POST':
+        form = ReviewerForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email'].lower()
+            reviewers = Reviewer.objects.all()
+            for reviewer in reviewers:
+                if reviewer.email == email:
+                    target_paper.reviewers.add(reviewer.id)
+
+                    reviewer.first_name = form.cleaned_data['first_name'] #
+                    reviewer.last_name = form.cleaned_data['last_name'] #
+                    reviewer.save() #
+
+                    return redirect('view_papers', conference_id)
+                
+            reviewer = form.save(commit=False)
+            users = User.objects.all()
+            for user in users:
+                if user.email == email:
+                    reviewer.user = user
+                    break
+            reviewer.email = email
+            form.save()
+
+            target_paper.reviewers.add(reviewer.id)
+
+            return redirect('view_papers', conference_id)
+        else:
+            print(form.errors)        
+    else:
+        form = ReviewerForm()
+    context = {
+        'papers': papers,
+        'conference': conference,
+        'form': form,
+        'target_paper': target_paper,
+        'display_add_reviewer_modal': display_add_reviewer_modal
+    }
+    return render(request, 'conference/view_papers.html', context)       
+
+def delete_reviewer(request, conference_id, paper_id, reviewer_id):
+    paper = Paper.objects.get(id=paper_id)
+    paper.reviewers.remove(reviewer_id)
+
+    reviewer = Reviewer.objects.get(id=reviewer_id)
+    papers = Paper.objects.all()
+
+    flag = 0
+    for paper in papers:
+        if reviewer in paper.reviewers.all():
+            flag = 1
+
+    if flag == 0:
+        reviewer.delete()
+
+    return redirect('view_papers', conference_id)    
+
+
+
 
 
 # def approve(request, uidb64, token):

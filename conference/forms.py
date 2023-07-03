@@ -5,7 +5,7 @@ from django.forms import modelformset_factory
 
 from .validators import allow_only_pdf_or_docx_validator
 
-from .models import Author, Conference, Paper
+from .models import Author, Conference, Paper, Reviewer
 
 
 class ConferenceForm(forms.ModelForm):
@@ -42,7 +42,7 @@ class ConferenceForm(forms.ModelForm):
 
 
 class PaperForm(forms.ModelForm):
-    file = forms.FileField(widget=forms.FileInput(attrs={'class': 'btn btn-info'}), required=False) #, validators=[allow_only_pdf_or_docx_validator]
+    # file = forms.FileField(widget=forms.FileInput(attrs={'class': 'btn btn-info'}), required=False) #, validators=[allow_only_pdf_or_docx_validator]
     is_submitter_author = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
     class Meta:
         model = Paper
@@ -61,4 +61,12 @@ ConferenceModelFormset = modelformset_factory(
 class AuthorForm(forms.ModelForm):
     class Meta:
         model = Author
+        fields = ['first_name', 'last_name', 'email']
+
+# class ReviewerForm(forms.Form):
+#     email = forms.EmailField()       
+
+class ReviewerForm(forms.ModelForm):
+    class Meta:
+        model = Reviewer
         fields = ['first_name', 'last_name', 'email']
