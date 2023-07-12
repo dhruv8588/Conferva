@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db.models.signals import post_save, pre_save
 from django.db.models.fields.related import OneToOneField
 from django.dispatch import receiver
+from django.contrib.postgres.fields import ArrayField
 
 from Conferva_main import settings
 
@@ -40,11 +41,14 @@ class UserManager(BaseUserManager):
         return user
 
 
+
 class User(AbstractBaseUser):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(max_length=100, unique=True)
+    # research_areas = models.ManyToManyField(ResearchArea, blank=True)
+    # research_areas = ArrayField(models.CharField(max_length=10, blank=True), size=3, blank=True, null=True)
 
     # required fields
     date_joined = models.DateTimeField(auto_now_add=True)
@@ -56,8 +60,8 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=False)
     is_superadmin = models.BooleanField(default=False)
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
 
     objects = UserManager()
 
@@ -76,7 +80,17 @@ class User(AbstractBaseUser):
             user_role = 'Admin'
         elif self.is_admin==False:
             user_role = 'Guest'
-        return user_role     
+        return user_role    
+
+    # def researched_in(self):
+    #     return ", ".join([str(i) for i in self.research_areas.all()]) 
+
+class ResearchArea(models.Model):
+    name = models.CharField(max_length=50, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='research_areas', blank=True, null=True)
+
+    def __str__(self):
+        return self.name
 
 class UserProfile(models.Model):
     user = OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)

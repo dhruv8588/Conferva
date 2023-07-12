@@ -16,6 +16,37 @@ def send_notification(mail_subject, mail_template, context):
     to_email = context['user'].email
     mail = EmailMessage(mail_subject, message, from_email, to=[to_email])
     mail.send()
+
+# def send_review_invitation(request, reviewer, email_template):
+#     from_email = settings.DEFAULT_FROM_EMAIL
+#     current_site = get_current_site(request)
+#     print(current_site)
+#     message = render_to_string(email_template, {
+#         'reviewer': reviewer,
+#         'domain': current_site,
+#         'uid': urlsafe_base64_encode(force_bytes(reviewer.pk)),
+#         'token': default_token_generator.make_token(reviewer),
+#     })
+#     mail_subject = 'Invite to Review'
+#     to_email = reviewer.email
+#     mail = EmailMessage(mail_subject, message, from_email, to=[to_email])
+#     mail.send()
+
+def send_review_invitation(request, user, email_template):
+    from_email = settings.DEFAULT_FROM_EMAIL
+    current_site = get_current_site(request)
+    print(current_site)
+    message = render_to_string(email_template, {
+        'reviewer': user,
+        'domain': current_site,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': default_token_generator.make_token(user),
+    })
+    mail_subject = 'Invite to Review'
+    to_email = user.email
+    mail = EmailMessage(mail_subject, message, from_email, to=[to_email])
+    mail.send()
+
     
 # def send_approval_request_email(request, mail_subject, mail_template):
 #     from_email = request.user.email

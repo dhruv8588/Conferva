@@ -22,14 +22,8 @@
                 <a class="nav-link" href="{% url 'logout' %}">Logout</a>
             </li>
             <li class="nav-item">
-                <a id="btn-nav" style="cursor:pointer">
-                    {% if user.is_admin == True %}
-                        <i class="fa-solid fa-bell"></i><span class="not_approved" data-bs-toggle="modal" data-bs-target="#exampleModal">5</span>
-                    {% else %}
-                        <i class="fa-solid fa-bell"></i><span class="not_approved" data-bs-toggle="modal" data-bs-target="#exampleModal">9</span>
-                    {% endif %}    
-                </a>
-            </li>        
+                <a class="nav-link" href="{% url 'reset_password' %}">Change Password</a>
+            </li>       
         {% else %}    
         <ul class="navbar-nav">  
             <li class="nav-item">
@@ -42,7 +36,7 @@
                 <a class="nav-link" href="{% url 'login' %}">Login</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'registerUser' %}">Register</a>
+                <a class="nav-link" href="{% url 'register_user' %}">Register</a>
             </li>
         </ul>
         {% endif %}  

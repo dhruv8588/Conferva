@@ -1,5 +1,6 @@
 Django==4.0.3
-Pillow==8.4.0
+Pillow==10.0.0
 python-decouple==3.5
 psycopg2-binary
 django-extensions==3.2.3
+django-widget-tweaks==1.4.12 

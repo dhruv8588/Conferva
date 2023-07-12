@@ -88,7 +88,7 @@ class Reviewer(models.Model):
 class Paper(models.Model):
     submitter = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     conference = models.ForeignKey(Conference, on_delete=models.SET_NULL, blank=True, null=True)
-    reviewers = models.ManyToManyField(Reviewer, blank=True)
+    reviewers = models.ManyToManyField(Reviewer, through='Paper_Reviewer')
     title = models.CharField(max_length=200)
     abstract = models.TextField(max_length=300)
     authors = models.ManyToManyField(Author, blank=True)
@@ -101,6 +101,9 @@ class Paper(models.Model):
 
     def written_by(self):
         return ", ".join([str(i) for i in self.authors.all()])
+    
+    def reviewed_by(self):
+        return ", ".join([str(i) for i in self.reviewers.all()])
     
     # def calculate_file_hash(self):
     #     import hashlib
@@ -124,4 +127,25 @@ class Paper(models.Model):
         return self.title
     
 
+class Paper_Reviewer(models.Model):
+    status_choices = (
+        ('pending', 'pending'),
+        ('accepted', 'accepted'),
+        ('rejected', 'rejected'),
+    )
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    reviewer = models.ForeignKey(Reviewer, on_delete=models.CASCADE)
+    status = models.CharField(max_length=50, choices=status_choices, default='pending')
+    class Meta:
+        unique_together = ('paper', 'reviewer')
     
+class Keywords(models.Model):
+    name = models.CharField(max_length=50, blank=True)
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE, related_name='keywords', blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Keyword'
+        verbose_name_plural = 'Keywords'
+
+    def __str__(self):
+        return self.name

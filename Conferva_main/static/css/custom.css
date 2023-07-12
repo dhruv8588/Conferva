@@ -5,14 +5,27 @@
     100% {bottom: -100%}
 }
 
-.show-notification {
+/* .show-notification {
     position: fixed;
     bottom: 100%;
     right: 20px;
     animation-name: show-toast;
     animation-duration: 5s;
     z-index: 99;
+} */
+
+.show-notification {
+    position: fixed;
+    bottom: 100%;
+    left: 1100px;
+    animation-name: show-toast;
+    animation-duration: 5s;
+    z-index: 99;
+    /* width: 400px; */
+    display: inline-block;
+    height: auto; 
 }
+
 
 .btn {
     padding: 2px 1.75em;

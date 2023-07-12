@@ -3,9 +3,11 @@ from django import forms
 from django.contrib.admin.widgets import AdminDateWidget
 from django.forms import modelformset_factory
 
+from accounts.models import User
+
 from .validators import allow_only_pdf_or_docx_validator
 
-from .models import Author, Conference, Paper, Reviewer
+from .models import Author, Conference, Keywords, Paper, Reviewer
 
 
 class ConferenceForm(forms.ModelForm):
@@ -53,9 +55,9 @@ ConferenceModelFormset = modelformset_factory(
     Conference,
     fields = ['name', 'acronym', 'research_area', 'venue', 'city', 'country', 'web_page', 'start_date', 'end_date', 'submission_deadline', 'is_approved'],
     extra=0,
-    widgets={
-        'name': forms.HiddenInput(),
-    },
+    # widgets={
+    #     'name': forms.HiddenInput(),
+    # },
 )
 
 class AuthorForm(forms.ModelForm):
@@ -70,3 +72,29 @@ class ReviewerForm(forms.ModelForm):
     class Meta:
         model = Reviewer
         fields = ['first_name', 'last_name', 'email']
+
+class InviteUserForm(forms.ModelForm):
+    is_invited = forms.BooleanField(required=False)
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name']
+      
+UserModelFormset = modelformset_factory(
+    User,
+    # fields = ['first_name', 'last_name'],
+    form = InviteUserForm,
+    extra = 0,
+)        
+
+class KeywordsForm(forms.ModelForm):
+    class Meta:
+        model = Keywords
+        fields = ['name']
+
+KeywordsFormSet = forms.inlineformset_factory(
+    Paper, Keywords, form=KeywordsForm,
+    extra=1,
+)        
+        
+
+    

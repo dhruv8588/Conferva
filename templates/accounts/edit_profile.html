@@ -1,0 +1,3 @@
+{% extends 'accounts/registerUser.html' %}
+
+{% block action %}action="{% url 'edit_profile' user.id %}"{% endblock %}

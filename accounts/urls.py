@@ -4,7 +4,8 @@ from . import views
 
 urlpatterns = [
     path('', views.myAccount),
-    path('registerUser/', views.registerUser, name='registerUser'),
+    path('register_user/', views.registerUser, name='register_user'),
+    path('edit_profile/<int:user_id>/', views.edit_profile, name='edit_profile'),
 
     path('login/', views.login, name="login"),
     path('logout/', views.logout, name="logout"),
@@ -17,8 +18,9 @@ urlpatterns = [
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),
 
     path('forgot_password/', views.forgot_password, name='forgot_password'),
-    path('reset_password_validate/<uidb64>/<token>/', views.reset_password_validate, name='reset_password_validate'),
     path('reset_password/', views.reset_password, name='reset_password'),
 
-    path('conference/', include('conference.urls'))
+    path('conference/', include('conference.urls')),
+
+    path('registerUser/deleteResearchArea/<int:pk>/', views.delete_research_area, name="delete_research_area"),
 ]  

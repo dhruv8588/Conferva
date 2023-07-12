@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'widget_tweaks',
     'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -55,7 +56,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-    'accounts.middlewares.OneSessionPerUser',
+    # 'accounts.middlewares.OneSessionPerUser',
 ]
 
 ROOT_URLCONF = 'Conferva_main.urls'

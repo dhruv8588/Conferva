@@ -29,8 +29,11 @@ urlpatterns = [
 
     path('<int:conference_id>/view_papers/', views.view_papers, name='view_papers'),
     path('<int:conference_id>/paper/<int:paper_id>/add_reviewer/', views.add_reviewer, name='add_reviewer'),
+    path('<int:conference_id>/paper/<int:paper_id>/add_new_reviewer/', views.add_new_reviewer, name='add_new_reviewer'),
     path('<int:conference_id>/paper/<int:paper_id>/edit_reviewer/<int:reviewer_id>/', views.edit_reviewer, name='edit_reviewer'),
     path('<int:conference_id>/paper/<int:paper_id>/delete_reviewer/<int:reviewer_id>/', views.delete_reviewer, name='delete_reviewer'),
-    
+    path('<int:conference_id>/paper/<int:paper_id>/reviewer/<int:reviewer_id>/', views.reviewer_info, name='reviewer_info'),
     # path('approve/<uidb64>/<token>/', views.approve, name='approve'),
+    path('review/<uidb64>/<token>/', views.review, name='review'),
 ]
+

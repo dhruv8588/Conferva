@@ -1,7 +1,7 @@
 from datetime import date
 from datetime import datetime
 import hashlib
-from django.forms import formset_factory, inlineformset_factory
+
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -16,10 +16,11 @@ from django.utils.dateformat import DateFormat
 from django.core.paginator import Paginator
 
 from accounts.models import User
-from conference.models import Author, Conference, Paper, Reviewer
+from conference.models import Author, Conference, Keywords, Paper, Reviewer
+from conference.utils import send_review_invitation
 # from .utils import send_approval_request_email
 
-from .forms import AuthorForm, ConferenceForm, ConferenceModelFormset, PaperForm, ReviewerForm
+from .forms import AuthorForm, ConferenceForm, ConferenceModelFormset, KeywordsFormSet, PaperForm, ReviewerForm, UserModelFormset
 from conference import forms
 
 def check_role_admin(user):
@@ -105,12 +106,14 @@ def create_conference(request):
     }
     return render(request, 'conference/create_conference.html', context)
 
+
+
 @login_required(login_url='login')
 def conference_listing(request):
     conferences = Conference.objects.filter(is_approved=True).order_by('created_at')
     today = date.today()
 
-    paginator = Paginator(conferences, 1)
+    paginator = Paginator(conferences, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -213,6 +216,7 @@ def edit_author(request, conference_id, paper_id, author_id):
             print(aform.errors)
     else:
         aform = AuthorForm(instance=author)
+        formset = KeywordsFormSet(prefix='keywords', instance=paper)
         
 
     context = {
@@ -222,11 +226,12 @@ def edit_author(request, conference_id, paper_id, author_id):
         "conference_id": conference_id,
         "paper": paper,
         "author_id": author_id,
+        "formset": formset,
     }
     if url_name == 'edit_author':
-        y = render(request, 'conference/submit_paper.html', context)
+        y = render(request, 'conference/edit_author.html', context)
     elif url_name == 'edit_paper_edit_author': 
-        y = render(request, 'conference/edit_paper.html', context)
+        y = render(request, 'conference/edit_paper_edit_author.html', context)
     return y       
 
 def add_author(request, conference_id, paper_id):
@@ -272,6 +277,7 @@ def add_author(request, conference_id, paper_id):
             print(aform.errors)
     else:
         aform = AuthorForm()
+        formset = KeywordsFormSet(prefix='keywords', instance=paper)
               
     context = {
         "aform": aform,
@@ -279,11 +285,12 @@ def add_author(request, conference_id, paper_id):
         "form": form,
         "conference_id": conference_id,
         "paper": paper,
+        "formset": formset
     }
     if url_name == 'add_author':
-        y = render(request, 'conference/submit_paper.html', context)
+        y = render(request, 'conference/add_author.html', context)
     elif url_name == 'edit_paper_add_author': 
-        y = render(request, 'conference/edit_paper.html', context)
+        y = render(request, 'conference/edit_paper_add_author.html', context)
     return y
 
 @login_required(login_url='login')
@@ -294,8 +301,17 @@ def submit_paper(request, conference_id, paper_id=None, author_id=None):
 
     if request.method == 'POST':
         form = PaperForm(request.POST, request.FILES, instance=paper)
+        formset = KeywordsFormSet(request.POST, prefix='keywords', instance=paper)
         paper = form.save()   
-        if form.is_valid():
+        if form.is_valid() and formset.is_valid():
+            for kform in formset:
+                keyword = kform.save(commit=False)
+                if keyword.name != '':
+                    keyword.paper = paper
+                    keyword.save()
+                elif keyword.name == '' and kform.instance.id:
+                    kform.instance.delete()    
+
             is_submitter_author = form.cleaned_data['is_submitter_author']
             if is_submitter_author == True:
                 authors = Author.objects.all()
@@ -333,7 +349,6 @@ def submit_paper(request, conference_id, paper_id=None, author_id=None):
             paper.submitter = request.user
             paper.conference = conference
             paper.save()
-
             action = request.GET.get('action')
             if action == 'edit_author': # submit paper
                 return redirect('edit_author', conference_id, paper.id, author_id)
@@ -373,13 +388,16 @@ def submit_paper(request, conference_id, paper_id=None, author_id=None):
                 messages.success(request, 'Paper edited successfully!')
             return redirect('myAccount')
         else:
-            print(form.errors)         
+            print(form.errors)  
+            print(formset.errors)       
     else:
         form = PaperForm(instance=paper)
+        formset = KeywordsFormSet(prefix='keywords', instance=paper)
     context = {
         "form": form,
         "conference_id": conference_id,
         "paper": paper,
+        "formset": formset
     }
     if url_name == 'submit_paper':
         return render(request, 'conference/submit_paper.html', context)
@@ -533,12 +551,11 @@ def edit_reviewer(request, conference_id, paper_id, reviewer_id):
     return render(request, 'conference/view_papers.html', context)       
 
 
-def add_reviewer(request, conference_id, paper_id):
+def add_new_reviewer(request, conference_id, paper_id):
     papers = Paper.objects.filter(conference=conference_id).order_by('created_at')
+    paper = Paper.objects.get(id=paper_id)
     conference = Conference.objects.get(id = conference_id)
-    
-    target_paper = Paper.objects.get(id=paper_id)
-    display_add_reviewer_modal = True
+    display_add_new_reviewer_modal = True
     if request.method == 'POST':
         form = ReviewerForm(request.POST)
         if form.is_valid():
@@ -546,7 +563,10 @@ def add_reviewer(request, conference_id, paper_id):
             reviewers = Reviewer.objects.all()
             for reviewer in reviewers:
                 if reviewer.email == email:
-                    target_paper.reviewers.add(reviewer.id)
+                    paper.reviewers.add(reviewer.id)
+
+                    # email_template = 'accounts/emails/review_invitation.html'
+                    # send_review_invitation(request, reviewer.user, email_template)
 
                     reviewer.first_name = form.cleaned_data['first_name'] #
                     reviewer.last_name = form.cleaned_data['last_name'] #
@@ -563,7 +583,9 @@ def add_reviewer(request, conference_id, paper_id):
             reviewer.email = email
             form.save()
 
-            target_paper.reviewers.add(reviewer.id)
+            paper.reviewers.add(reviewer.id)
+            # email_template = 'accounts/emails/review_invitation.html'
+            # send_review_invitation(request, reviewer.user, email_template)
 
             return redirect('view_papers', conference_id)
         else:
@@ -571,13 +593,93 @@ def add_reviewer(request, conference_id, paper_id):
     else:
         form = ReviewerForm()
     context = {
-        'papers': papers,
-        'conference': conference,
         'form': form,
-        'target_paper': target_paper,
-        'display_add_reviewer_modal': display_add_reviewer_modal
+        'paper': paper,
+        'papers': papers,
+        'display_add_new_reviewer_modal': display_add_new_reviewer_modal,
+        'conference': conference,
     }
     return render(request, 'conference/view_papers.html', context)       
+
+def add_reviewer(request, conference_id, paper_id):
+    papers = Paper.objects.filter(conference=conference_id).order_by('created_at')
+    paper = Paper.objects.get(id=paper_id)
+    display_add_reviewer_modal = True
+    conference = Conference.objects.get(id = conference_id)
+    if request.method == 'POST':
+        formset = UserModelFormset(request.POST)
+        
+        for form in formset:
+            user = form.save(commit=False)
+            is_invited = form.cleaned_data.get('is_invited')
+
+            flag = 0
+            if is_invited == True:
+                reviewers = Reviewer.objects.all()
+                for reviewer in reviewers:
+                    if reviewer.user == user:
+                        paper.reviewers.add(reviewer.id)
+                        flag = 1
+                if flag == 0:
+                    reviewer = Reviewer.objects.create(user=user, first_name=user.first_name, last_name=user.last_name, email=user.email)
+                    reviewer.save()
+                    paper.reviewers.add(reviewer)  
+                
+        return redirect('view_papers', conference_id)
+    else:
+        # id_list = []
+        # reviewers = paper.reviewers.all()
+        # for reviewer in reviewers:
+        #     if reviewer.user:
+        #         id_list.append(reviewer.user.id)     
+        # users = User.objects.exclude(id__in=id_list)
+    
+        # formset = UserModelFormset(queryset=users)
+
+        # only filter(), all() and exclude() methods on User.objects will return the queryset; get() method won't
+        keywords = paper.keywords.all()
+        users = User.objects.all()
+        id_list = []
+
+        for user in users:
+            research_areas_names = []
+            for research_area in user.research_areas.all():
+                research_areas_names.append(research_area.name)
+            for keyword in keywords:                  
+                if any(keyword.name.replace(" ", "").lower() == research_area_name.replace(" ", "").lower() for research_area_name in research_areas_names):    
+                       id_list.append(user.id)
+                       break
+
+        reviewers = paper.reviewers.all()
+        for reviewer in reviewers:
+            if reviewer.user:
+                if reviewer.user.id in id_list:
+                    id_list.remove(reviewer.user.id)       
+
+        users = User.objects.filter(id__in=id_list)
+        formset = UserModelFormset(queryset=users)
+
+    context = {
+        'formset': formset,
+        'paper': paper,
+        'papers': papers,
+        'display_add_reviewer_modal': display_add_reviewer_modal,
+        'conference': conference,
+    }
+    return render(request, 'conference/view_papers.html', context)
+
+def reviewer_info(request, conference_id, paper_id, reviewer_id):
+    papers = Paper.objects.filter(conference=conference_id).order_by('created_at')
+    conference = Conference.objects.get(id = conference_id)
+    display_reviewer_info_modal = True
+    reviewer = Reviewer.objects.get(id=reviewer_id)
+    context = {
+        "papers": papers,
+        "conference": conference,
+        "display_reviewer_info_modal": display_reviewer_info_modal,
+        "reviewer": reviewer
+    } 
+    return render(request, 'conference/view_papers.html', context)
 
 def delete_reviewer(request, conference_id, paper_id, reviewer_id):
     paper = Paper.objects.get(id=paper_id)
@@ -616,6 +718,21 @@ def delete_reviewer(request, conference_id, paper_id, reviewer_id):
 #         return redirect('myAccount')   
 
 
+def review(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User._default_manager.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        messages.success(request, 'Congratulations! Your account is activated.')
+        return redirect('myAccount')
+    else:
+        messages.error(request, 'Invalid activation link')    
+        return redirect('myAccount')
 
 
     

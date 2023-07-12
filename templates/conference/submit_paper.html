@@ -12,14 +12,6 @@
 
     {% csrf_token %}
 
-    {% if display_add_author_modal %}
-        {% include 'conference/add_author.html' %}
-    {% endif %}
-
-    {% if display_edit_author_modal %}
-        {% include 'conference/edit_author.html' %}
-    {% endif %}
-
     <div class="form-row">
         <div class="form-group col-md-6">
             <label>Title</label> {{ form.title }}
@@ -53,6 +45,34 @@
       </div>
    </div>
 
+   <div class="form-row">
+    <div class="form-group col-md-6" id="item-keywords">
+      <label>Keywords</label>&nbsp; &nbsp;<a href="#" class="add-keywords"><i class="fas fa-plus"></i></a>
+      <br />
+      {{ formset.management_form }} 
+      {% for form in formset %}
+      <tr>
+        {% for field in form.visible_fields %} 
+          {% if field.name != 'DELETE' %}
+            <td>
+              {{ field }}
+              {% for error in field.errors %}
+                <span style="color: red">{{ error }}</span>
+              {% endfor %}
+            </td>
+          {% endif %} 
+        {% endfor %} 
+        {% if form.instance.pk %}
+          <input type="hidden" name="{{ formset.prefix }}-{{ forloop.counter0 }}-id" value="{{ form.instance.pk }}"/>
+        {% endif %}
+      </tr>
+      <br/>
+      {% endfor %}
+    </div>
+  </div>
+
+
+
     <div class="form-row">
         <div class="form-group col-md-6">
             <label>File</label>
@@ -79,6 +99,12 @@
     <li style="color: red;">{{ form.non_field_errors }}</li>
 </form>
 
+<script
+  src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+  integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+  crossorigin="anonymous"
+></script>
+
 <script>
   var formActionLinks = document.getElementsByClassName('form-action-link');
   for (var i = 0; i < formActionLinks.length; i++) {
@@ -91,6 +117,49 @@
       form.submit();
     });
   }
+</script>
+
+
+<script>
+  $(document).ready(function () {
+    $(".add-keywords").click(function (ev) {
+      ev.preventDefault();
+      var formPrefix = "keywords";
+      var tmplMarkup = `
+            <tr>
+                {% for field in formset.empty_form.visible_fields %}
+                {% if field.name != 'DELETE' %}
+                    <td>
+                        {{ field }}
+                        {% for error in field.errors %}
+                            <span style="color: red">{{ error }}</span>
+                        {% endfor %}
+                    </td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        `;
+      var tmplMarkupWithValues = tmplMarkup;
+      var formCountInput = $("#id_" + formPrefix + "-TOTAL_FORMS");
+      var formCount = parseInt(formCountInput.val());
+
+      // update form count
+      formCount += 1;
+      formCountInput.val(formCount);
+
+      // add 'required' attribute to dynamically added form fields
+      tmplMarkupWithValues = tmplMarkupWithValues.replace(
+        /__prefix__/g,
+        formCount - 1
+      );
+      tmplMarkupWithValues = tmplMarkupWithValues.replace(
+        /keywords-__prefix__/g,
+        "keywords-" + (formCount - 1)
+      );
+
+      $("#item-keywords").append(tmplMarkupWithValues);
+    });
+  });
 </script>
 
 

@@ -3,8 +3,24 @@
 
 {% block content %}
 
+{% if display_add_reviewer_modal %}
+    {% include 'conference/add_reviewer.html' %}
+{% endif %}
+
+{% if display_add_new_reviewer_modal %}
+    {% include 'conference/add_new_reviewer.html' %}
+{% endif %}
+
+{% if display_edit_reviewer_modal %}
+    {% include 'conference/edit_reviewer.html' %}
+{% endif %} 
+
+{% if display_reviewer_info_modal %}
+    {% include 'conference/reviewer_info.html' %}
+{% endif %}
+
 {% if papers %}
-    <h3>Papers submitted to {{ conference.name }}</h3>
+    <h3>Papers submitted to the <i>{{ conference.name }} ({{ conference.acronym }})</i></h3>
     <table class="table">
     <thead>
         <tr>
@@ -17,12 +33,6 @@
         </tr>
     </thead>
     <tbody>
-        {% if display_add_reviewer_modal %}
-            {% include 'conference/add_reviewer.html' %}
-        {% endif %}    
-        {% if display_edit_reviewer_modal %}
-            {% include 'conference/edit_reviewer.html' %}
-        {% endif %} 
         {% for paper in papers %}
         <tr>
             <th scope="row">{{ forloop.counter }}</th>
@@ -39,12 +49,19 @@
                 {% endif %}
             </td>
             <td>
-                {% if paper.reviewers %}
-                    {% for reviewer in paper.reviewers.all %}
-                        {{ reviewer.first_name }} {{reviewer.last_name }} <a href="{% url 'edit_reviewer' conference.id paper.id reviewer.id %}"><i class="fas fa-edit"></i></a>   <a href="{% url 'delete_reviewer' conference.id paper.id reviewer.id %}" onclick="return confirm('Are you sure you want to delete this reviewer?')"><i class="fas fa-trash text-danger"></i></a> <br>
-                    {% endfor %}
-                {% endif %}
-                <a href="{% url 'add_reviewer' conference.id paper.id %}"><i class='fas fa-plus'></i></a>
+                <a href="{% url 'add_reviewer' conference.id paper.id %}" style="color: unset;"><b>From Users</b> <i class='fas fa-plus'></i></a><br/>
+                {% for reviewer in paper.reviewers.all %}   
+                    {% if reviewer.user %} 
+                        {{ reviewer.first_name }} {{reviewer.last_name }} <a href="{% url 'reviewer_info' conference.id paper.id reviewer.id %}" style="color:black"><i class="fa fa-info-circle"></i></a>  <a href="{% url 'delete_reviewer' conference.id paper.id reviewer.id %}" onclick="return confirm('Are you sure you want to delete this reviewer?')"><i class="fas fa-trash text-danger"></i></a> <br>
+                    {% endif %}
+                {% endfor %}
+                
+                <a href="{% url 'add_new_reviewer' conference.id paper.id %}"><b>From Yourself</b> <i class='fas fa-plus'></i></a><br/>
+                {% for reviewer in paper.reviewers.all %}
+                    {% if not reviewer.user %}
+                    <span style="color:blue">{{ reviewer.first_name }} {{reviewer.last_name }}</span> <a href="{% url 'edit_reviewer' conference.id paper.id reviewer.id %}"><i class="fas fa-edit"></i></a>   <a href="{% url 'delete_reviewer' conference.id paper.id reviewer.id %}" onclick="return confirm('Are you sure you want to delete this reviewer?')"><i class="fas fa-trash text-danger"></i></a> <br>
+                    {% endif %}
+                {% endfor %}       
             </td>
         </tr>
         {% endfor %}    

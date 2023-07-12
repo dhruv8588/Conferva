@@ -1,21 +1,26 @@
 from django import forms
 
-from .models import User
-
+from .models import ResearchArea, User
 
 class UserForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput())
-    confirm_password = forms.CharField(widget=forms.PasswordInput())
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'email', 'password']
+        fields = ['first_name', 'last_name', 'email'] 
+        
+class ResearchAreaForm(forms.ModelForm):
+    class Meta:
+        model = ResearchArea       
+        fields = ['name']
 
-    def clean(self):
-        cleaned_data =  super(UserForm, self).clean()    
-        password = cleaned_data.get('password')
-        confirm_password = cleaned_data.get('confirm_password')
+# ResearchAreaModelFormset = forms.formset_factory(
+#     ResearchArea,
+#     #form = ResearchAreaForm,
+#     # fields = ['name'],
+#     extra = 0
+# )
 
-        if password != confirm_password:
-            raise forms.ValidationError(
-                "Password does not match!"
-            )    
+ResearchAreaFormSet = forms.inlineformset_factory(
+    User, ResearchArea, form=ResearchAreaForm,
+    extra=1,
+)        
+
