@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+
   {% include 'includes/alerts.html' %}
  
   {% if not display_add_author_modal and not display_edit_author_modal %}
@@ -90,7 +91,7 @@
         {% for field in form %}
           {% if field.errors %}
             {% for error in field.errors %}
-              <li style="color: red;">{{field}}: {{ error }}</li>
+              <li style="color: red;">{{ error }}</li>
             {% endfor %}
           {% endif %}
         {% endfor %}

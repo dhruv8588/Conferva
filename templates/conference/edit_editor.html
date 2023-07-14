@@ -1,0 +1,21 @@
+{% extends 'conference/add_editor.html' %}
+
+{% block modal-id %} id="edit_editor_modal" {% endblock modal-id %}
+
+{% block modal-title %}<i class="fas fa-edit"></i>&nbsp;&nbsp; Edit Editor</h5>{% endblock modal-title %}
+
+{% block action %} action="{% url 'edit_editor' conference.id editor_id %}" {% endblock action %}
+
+{% block btn-action %}<i class="fas fa-edit"></i>&nbsp;&nbsp;Save Changes{% endblock btn-action %}
+
+{% block js %}
+<script>
+  $(document).ready(function() {
+    $('#edit_editor_modal').modal('show');
+    $('#edit_editor_modal').on('click', function(event) {
+      if ($(event.target).is('#edit_editor_modal')) {
+        redirectToCreateConference();
+      }
+    });
+  }); 
+{% endblock js %}

@@ -1,0 +1,5 @@
+{% extends 'conference/add_editor.html' %}
+
+{% block action %} action="{% url 'edit_conference_add_editor' conference.id %}" {% endblock action %}
+
+{% block redirect-link %}"{% url 'edit_conference' conference.id %}"{% endblock %}

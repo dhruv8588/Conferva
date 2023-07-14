@@ -16,11 +16,11 @@ from django.utils.dateformat import DateFormat
 from django.core.paginator import Paginator
 
 from accounts.models import User
-from conference.models import Author, Conference, Keywords, Paper, Reviewer
+from conference.models import Author, Conference, Editor, Keywords, Paper, Paper_Reviewer, Review, Reviewer
 from conference.utils import send_review_invitation
 # from .utils import send_approval_request_email
 
-from .forms import AuthorForm, ConferenceForm, ConferenceModelFormset, KeywordsFormSet, PaperForm, ReviewerForm, UserModelFormset
+from .forms import AuthorForm, ConferenceForm, ConferenceModelFormset, EditorForm, KeywordsFormSet, PaperForm, ReviewForm, ReviewerForm, UserModelFormset
 from conference import forms
 
 def check_role_admin(user):
@@ -33,80 +33,306 @@ def get_user(request):
     user = Conference.objects.get(user=request.user)
     return user
 
-def edit_conference(request, conference_id):
-    conference = Conference.objects.get(id=conference_id)
-    if request.method == 'POST':
-        form = ConferenceForm(request.POST, instance=conference)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Conference updated successfully!')
-            return redirect('myAccount')
-        else:
-            print(form.errors)
-    else:
-        form = ConferenceForm(instance=conference)
-    context = {
-        "form": form,
-        'conference_id': conference_id,
-    }                
-    return render(request, 'conference/edit_conference.html', context)
+# def edit_conference(request, conference_id):
+#     conference = Conference.objects.get(id=conference_id)
+#     if request.method == 'POST':
+#         form = ConferenceForm(request.POST, instance=conference)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, 'Conference updated successfully!')
+#             return redirect('myAccount')
+#         else:
+#             print(form.errors)
+#     else:
+#         form = ConferenceForm(instance=conference)
+#     context = {
+#         "form": form,
+#         'conference_id': conference_id,
+#     }                
+#     return render(request, 'conference/edit_conference.html', context)
 
 def delete_conference(request, conference_id):
-    papers = Paper.objects.filter(conference=conference_id)
-    for paper in papers:
-        ps = Paper.objects.exclude(id=paper.id)
-
-        authors = paper.authors.all()
-        flag = 0
-        for author in authors:
-            for p in ps:
-                if author in p.authors.all():
-                    flag = 1
-                    break
-            if flag == 0:
-                author.delete()
-        
-        reviewers = paper.reviewers.all()
-        flag = 0
-        for reviewer in reviewers:
-            for p in ps:
-                if reviewer in p.reviewers.all():
-                    flag = 1
-                    break
-            if flag == 0:
-                reviewer.delete()    
-
-        paper.delete()
-
     conference = Conference.objects.get(id=conference_id)
+    conferences = Conference.objects.exclude(id=conference_id)
+    for c in conferences:
+        editors = c.editors.all()
+        flag = 0
+        for editor in editors: 
+            if editor in conference.editors.all():
+                flag = 1
+                break
+        if flag == 0:
+            editor.delete()
+
     conference.delete()
     messages.success(request, 'Conference has been deleted successfully!')    
 
     return redirect('myAccount')
 
+# @login_required(login_url='login')
+# def create_conference(request):
+#     if request.method == 'POST':
+#         form = ConferenceForm(request.POST)
+#         if form.is_valid():
+#             conference = form.save(commit=False)
+#             conference.creator = request.user 
+#             conference.save()
+
+#             mail_subject = 'Request for conference approval'
+#             email_template = 'accounts/emails/approval_request.html'
+#             # send_approval_request_email(request, mail_subject, email_template)
+
+#             messages.success(request, 'Your conference has been registered sucessfully! Please wait for the approval.')
+#             return redirect('myAccount')
+#     else:
+#         form = ConferenceForm()
+#     context = {
+#         "form": form,
+#     }
+#     return render(request, 'conference/create_conference.html', context)
+
 @login_required(login_url='login')
-def create_conference(request):
+def create_conference(request, conference_id=None, editor_id=None):
+    conference = get_object_or_404(Conference, id=conference_id) if conference_id else None
+    url_name = resolve(request.path_info).url_name
+
     if request.method == 'POST':
-        form = ConferenceForm(request.POST)
+        form = ConferenceForm(request.POST, instance=conference)
+        conference = form.save()   
         if form.is_valid():
-            conference = form.save(commit=False)
-            conference.creator = request.user 
+            is_creator_editor = form.cleaned_data['is_creator_editor']
+            if is_creator_editor == True:
+                editors = Editor.objects.all()
+                flag = 0
+                for editor in editors:
+                    if editor.user == request.user:
+                        conference.editors.add(editor.id)
+                        flag = 1
+                        break 
+                if flag==0:    
+                    new_editor = Editor.objects.create(
+                                        first_name = request.user.first_name,
+                                        last_name = request.user.last_name,
+                                        email = request.user.email,
+                                        user = request.user,
+                                    )
+                    new_editor.save()
+                    conference.editors.add(new_editor.id) 
+            else:
+                editors = Editor.objects.all()
+                for editor in editors:
+                    if editor.user == request.user:
+                        if editor in conference.editors.all():
+                            conference.editors.remove(editor.id)
+
+                            flag = 0
+                            conferences = Conference.objects.exclude(id=conference.id)
+                            for conference in conferences:
+                                if editor in conference.editors.all():
+                                       flag = 1 
+                            if flag == 0:
+                                editor.delete()           
+                            break
+
+            conference.creator = request.user
             conference.save()
 
-            mail_subject = 'Request for conference approval'
-            email_template = 'accounts/emails/approval_request.html'
-            # send_approval_request_email(request, mail_subject, email_template)
+            action = request.GET.get('action')
+            if action == 'edit_editor': # create conference
+                return redirect('edit_editor', conference.id, editor_id)
+            elif action == 'delete_editor': # create conference
+                return redirect('delete_editor', conference.id, editor_id)
+            elif action == 'edit_conference_edit_editor':
+                return redirect('edit_conference_edit_editor', conference.id, editor_id)
+            elif action == 'edit_conference_delete_editor':
+                return redirect('edit_conference_delete_editor', conference.id, editor_id)
+            
+            if 'add_editor' in request.POST: # create conference
+                return redirect('add_editor', conference.id)
+            elif 'edit_conference_add_editor' in request.POST:
+                return redirect('edit_conference_add_editor', conference.id)
+            
+            if url_name == 'create_conference':        
+                mail_subject = 'Request for conference approval'
+                email_template = 'accounts/emails/approval_request.html'
+                # send_approval_request_email(request, mail_subject, email_template)
 
-            messages.success(request, 'Your conference has been registered sucessfully! Please wait for the approval.')
+                messages.success(request, 'Your conference has been registered sucessfully! Please wait for the approval.')
+            elif url_name == 'edit_conference':
+                messages.success(request, 'Conference edited successfully!')
             return redirect('myAccount')
+        else:
+            print(form.errors)     
     else:
-        form = ConferenceForm()
+        form = ConferenceForm(instance=conference)
     context = {
         "form": form,
+        "conference": conference,
     }
-    return render(request, 'conference/create_conference.html', context)
+    if url_name == 'create_conference':
+        return render(request, 'conference/create_conference.html', context)
+    elif url_name == 'edit_conference':
+        return render(request, 'conference/edit_conference.html', context)
 
+def add_editor(request, conference_id):
+    url_name = resolve(request.path_info).url_name
+    if url_name == 'add_editor':
+        x = redirect('create_conference', conference_id)
+    elif url_name == 'edit_conference_add_editor':    
+        x = redirect('edit_conference', conference_id)
+        
+    conference = get_object_or_404(Conference, id=conference_id)
+    form = ConferenceForm(instance=conference)
+    display_add_editor_modal = True 
 
+    if request.method == 'POST':
+        eform = EditorForm(request.POST)
+        if eform.is_valid(): 
+            email = eform.cleaned_data['email'].lower()
+            editors = Editor.objects.all()
+            for editor in editors:
+                if editor.email == email:
+                    conference.editors.add(editor.id)
+                    editor.first_name = eform.cleaned_data['first_name'] #
+                    editor.last_name = eform.cleaned_data['last_name'] #
+                    editor.save() #
+                    # paper.save()
+                    # return redirect('submit_paper', conference_id, paper_id)
+                    return x
+                
+            editor = eform.save(commit=False)
+            users = User.objects.all()
+            for user in users:
+                if user.email == email:
+                    editor.user = user
+                    break
+            editor.email = email
+            eform.save()
+
+            conference.editors.add(editor.id)
+            
+            return x
+        else:
+            print(eform.errors)
+    else:
+        eform = EditorForm()
+              
+    context = {
+        "eform": eform,
+        "display_add_editor_modal": display_add_editor_modal,
+        "form": form,
+        "conference": conference,
+    }
+    if url_name == 'add_editor':
+        y = render(request, 'conference/add_editor.html', context)
+    elif url_name == 'edit_conference_add_editor': 
+        y = render(request, 'conference/edit_conference_add_editor.html', context)
+    return y
+
+def delete_editor(request, conference_id, editor_id):
+    url_name = resolve(request.path_info).url_name
+    if url_name == 'delete_editor':
+        x = redirect('create_conference', conference_id)
+    elif url_name == 'edit_conference_delete_editor':
+        x = redirect('edit_conference', conference_id)
+
+    conference = get_object_or_404(Conference, id=conference_id)
+    conference.editors.remove(editor_id)
+
+    editor = get_object_or_404(Editor, id=editor_id)
+
+    conferences = Conference.objects.all()
+    for conference in conferences:
+        if editor in conference.editors.all():
+            return x
+
+    editor.delete()
+    return x
+
+def edit_editor(request, conference_id, editor_id):
+    url_name = resolve(request.path_info).url_name
+    if url_name == 'edit_editor':
+        x = redirect('create_conference', conference_id)
+    elif url_name == 'edit_conference_edit_editor':
+        x = redirect('edit_conference', conference_id)
+
+    conference = get_object_or_404(Conference, id=conference_id)
+    form = ConferenceForm(instance=conference)
+    display_edit_editor_modal = True
+
+    editor = get_object_or_404(Editor, id=editor_id)
+    if request.method == 'POST':
+        eform = EditorForm(request.POST, instance=editor)
+        if eform.is_valid():
+            # code starts here
+            entered_email = editor.email.lower()
+            orig = Editor.objects.get(id=editor_id)
+            if entered_email != orig.email:
+                flag = 0
+                other_editors = Editor.objects.exclude(id=orig.id)
+                for other_editor in other_editors:
+                    if other_editor.email == entered_email:
+                        conference.editors.add(other_editor.id)
+                        other_editor.first_name = editor.first_name #
+                        other_editor.last_name = editor.last_name #
+                        other_editor.save() #
+                        conference.editors.remove(orig.id)
+                        flag = 1
+                if flag==1:
+                    delete_orig = True
+                    other_conferences = Conference.objects.exclude(id=conference_id)
+                    for other_conference in other_conferences:
+                        if orig in other_conference.editors.all():
+                            delete_orig = False
+                            return x
+                    if delete_orig == True:
+                        orig.delete()
+                        return x     
+                elif flag == 0:
+                    flag2 = 0
+                    other_conferences = Conference.objects.exclude(id=conference_id)
+                    for other_conference in other_conferences:
+                        if orig in other_conference.editors.all():
+                            conference.editors.remove(orig.id)
+                            # create a new editor object with a different id and the field values of editor object
+                            new_editor = Editor.objects.create(
+                                first_name = editor.first_name,
+                                last_name = editor.last_name,
+                                email = editor.email
+                            )
+                            users = User.objects.all()
+                            for user in users:
+                                if user.email == new_editor.email:
+                                    new_editor.user = user
+                                    break
+                            new_editor.save()
+                            conference.editors.add(new_editor.id)
+                            flag2 = 1
+                    if flag2 == 0:
+                        editor.save()
+                    return x          
+            else:
+                orig.first_name = editor.first_name #
+                orig.last_name = editor.last_name #
+                orig.save() #
+                return x
+        else:
+            print(eform.errors)
+    else:
+        eform = EditorForm(instance=editor)
+
+    context = {
+        "eform": eform,
+        "display_edit_editor_modal": display_edit_editor_modal,
+        "form": form,
+        "conference": conference,
+        "editor_id": editor_id,
+    }
+    if url_name == 'edit_editor':
+        y = render(request, 'conference/edit_editor.html', context)
+    elif url_name == 'edit_conference_edit_editor': 
+        y = render(request, 'conference/edit_conference_edit_editor.html', context)
+    return y       
 
 @login_required(login_url='login')
 def conference_listing(request):
@@ -144,7 +370,6 @@ def delete_author(request, conference_id, paper_id, author_id):
     author.delete()
     return x
     
-
 def edit_author(request, conference_id, paper_id, author_id):
     url_name = resolve(request.path_info).url_name
     if url_name == 'edit_author':
@@ -455,10 +680,10 @@ def edit_is_approved(request):
     else:
         formset = ConferenceModelFormset(queryset = Conference.objects.all())
 
-    for form in formset:
-        form.instance.start_date = DateFormat(form.instance.start_date).format('Y-m-d')
-        form.instance.end_date = DateFormat(form.instance.end_date).format('Y-m-d')
-        form.instance.submission_deadline = DateFormat(form.instance.submission_deadline).format('Y-m-d')
+    # for form in formset:
+    #     form.instance.start_date = DateFormat(form.instance.start_date).format('Y-m-d')
+    #     form.instance.end_date = DateFormat(form.instance.end_date).format('Y-m-d')
+    #     form.instance.submission_deadline = DateFormat(form.instance.submission_deadline).format('Y-m-d')
     context = {
         'formset': formset,
     }
@@ -718,21 +943,72 @@ def delete_reviewer(request, conference_id, paper_id, reviewer_id):
 #         return redirect('myAccount')   
 
 
-def review(request, uidb64, token):
-    try:
-        uid = urlsafe_base64_decode(uidb64).decode()
-        user = User._default_manager.get(pk=uid)
-    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
+def accept_or_decline_to_review(request, paper_id):
+    paper = Paper.objects.get(id=paper_id)
+    context = {
+        "paper": paper
+    }
+    return render(request, 'conference/accept_or_decline_to_review.html', context)
 
-    if user is not None and default_token_generator.check_token(user, token):
-        user.is_active = True
-        user.save()
-        messages.success(request, 'Congratulations! Your account is activated.')
+def decline_to_review(request, paper_id):
+    paper_reviewer = Paper_Reviewer.objects.get(paper=paper_id, reviewer__user=request.user)
+    paper_reviewer.status = 'declined'
+    paper_reviewer.save()
+
+    messages.info(request, 'You have declined to review the paper- %s' % paper_reviewer.paper.title)  
+    return redirect('myAccount')
+
+def delete_review(request, paper_id):
+    review = Review.objects.get(paper=paper_id, reviewer__user=request.user) 
+    review.delete()
+    messages.info(request, 'You have successfully deleted your review of the paper- %s' % review.paper.title)
+    return redirect('myAccount')
+
+def review(request, paper_id):
+    paper = Paper.objects.get(id=paper_id)
+
+    paper_reviewer = Paper_Reviewer.objects.get(paper=paper_id, reviewer__user=request.user)
+    paper_reviewer.status = 'accepted'
+    paper_reviewer.save()
+
+    try:
+        review = Review.objects.get(paper=paper_id, reviewer__user=request.user) 
+    except:
+        review = None
+
+    if request.method == 'POST':
+        form = ReviewForm(request.POST, instance=review)
+        review = form.save(commit=False)
+        review.paper = paper
+        review.reviewer = paper_reviewer.reviewer
+        review.save()
+        messages.info(request, 'You have successfully reviewed the paper- %s' % paper_reviewer.paper.title)
         return redirect('myAccount')
     else:
-        messages.error(request, 'Invalid activation link')    
-        return redirect('myAccount')
+        form = ReviewForm(instance=review)    
+    context = {
+        'form': form,
+        'paper': paper,
+        'review': review
+    }
+    return render(request, 'conference/review.html', context)
+
+
+# def review(request, uidb64, token):
+#     try:
+#         uid = urlsafe_base64_decode(uidb64).decode()
+#         user = User._default_manager.get(pk=uid)
+#     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+#         user = None
+
+#     if user is not None and default_token_generator.check_token(user, token):
+#         user.is_active = True
+#         user.save()
+#         messages.success(request, 'Congratulations! Your account is activated.')
+#         return redirect('myAccount')
+#     else:
+#         messages.error(request, 'Invalid activation link')    
+#         return redirect('myAccount')
 
 
     

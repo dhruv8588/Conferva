@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.contrib.sessions.models import Session
 
-from conference.models import Conference, Paper
+from conference.models import Conference, Paper, Paper_Reviewer
 
 from .utils import detectUser, send_verification_email
 
@@ -175,9 +175,12 @@ def myAccount(request):
 def guestDashboard(request):
     papers = Paper.objects.filter(submitter=request.user)
     conferences = Conference.objects.filter(creator=request.user)
+    paper_reviewers = Paper_Reviewer.objects.filter(reviewer__user=request.user)
+    
     context = {
         "papers": papers,
         "conferences": conferences,
+        "paper_reviewers": paper_reviewers
     }
     return render(request, 'accounts/guestDashboard.html', context)
 

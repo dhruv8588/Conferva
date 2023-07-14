@@ -22,6 +22,9 @@
                 <a class="nav-link" href="{% url 'logout' %}">Logout</a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" href="{% url 'edit_profile' user.id %}">Edit Profile</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="{% url 'reset_password' %}">Change Password</a>
             </li>       
         {% else %}    

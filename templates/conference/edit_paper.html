@@ -8,14 +8,6 @@
 
     {% csrf_token %}
 
-    {% if display_add_author_modal %}
-        {% include 'conference/edit_paper_add_author.html' %}
-    {% endif %}
-
-    {% if display_edit_author_modal %}
-        {% include 'conference/edit_paper_edit_author.html' %} 
-    {% endif %}
-
     <div class="form-row">
         <div class="form-group col-md-6">
             <label>Title</label> {{ form.title }}

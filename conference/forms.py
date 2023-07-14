@@ -7,13 +7,14 @@ from accounts.models import User
 
 from .validators import allow_only_pdf_or_docx_validator
 
-from .models import Author, Conference, Keywords, Paper, Reviewer
+from .models import Author, Conference, Editor, Keywords, Paper, Review, Reviewer
 
 
 class ConferenceForm(forms.ModelForm):
+    is_creator_editor = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
     class Meta:
         model = Conference
-        fields = ['name', 'acronym', 'research_area', 'venue', 'city', 'country', 'web_page', 'start_date', 'end_date', 'submission_deadline']
+        fields = ['name', 'acronym', 'research_area', 'venue', 'city', 'country', 'web_page', 'start_date', 'end_date', 'submission_deadline', 'is_creator_editor']
         widgets = {
             "start_date": AdminDateWidget(),
             "end_date": AdminDateWidget(),
@@ -53,7 +54,7 @@ class PaperForm(forms.ModelForm):
 
 ConferenceModelFormset = modelformset_factory(
     Conference,
-    fields = ['name', 'acronym', 'research_area', 'venue', 'city', 'country', 'web_page', 'start_date', 'end_date', 'submission_deadline', 'is_approved'],
+    fields = ['is_approved'],
     extra=0,
     # widgets={
     #     'name': forms.HiddenInput(),
@@ -67,6 +68,11 @@ class AuthorForm(forms.ModelForm):
 
 # class ReviewerForm(forms.Form):
 #     email = forms.EmailField()       
+
+class EditorForm(forms.ModelForm):
+    class Meta:
+        model = Editor
+        fields = ['first_name', 'last_name', 'email']
 
 class ReviewerForm(forms.ModelForm):
     class Meta:
@@ -96,5 +102,8 @@ KeywordsFormSet = forms.inlineformset_factory(
     extra=1,
 )        
         
-
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['body']
     

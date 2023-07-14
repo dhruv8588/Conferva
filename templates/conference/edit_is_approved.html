@@ -10,12 +10,12 @@
         <tr>
             <th scope="col">#</th>
             <th scope="col">Name</th>
-            <th scope="col">Acronym</th>
             <th scope="col">Research area</th>
             <th scope="col">Where</th>
             <th scope="col">Start date</th>
             <th scope="col">End date</th>
             <th scope="col">Submission Deadline</th>
+            <th scope="col">Editors</th>
             <th scope="col">Is approved</th>    
         </tr>
         </thead>
@@ -24,7 +24,7 @@
                 <tr>
                     <th scope="row">{{ forloop.counter }}</th>
                     <input type="hidden" name="{{ form.prefix }}-id" value="{{ form.instance.id }}">
-                    <input type="hidden" name="{{ form.prefix }}-name" value="{{ form.instance.name }}">
+                    {% comment %} <input type="hidden" name="{{ form.prefix }}-name" value="{{ form.instance.name }}">
                     <input type="hidden" name="{{ form.prefix }}-acronym" value="{{ form.instance.acronym }}">
                     <input type="hidden" name="{{ form.prefix }}-research_area" value="{{ form.instance.research_area }}">
                     <input type="hidden" name="{{ form.prefix }}-venue" value="{{ form.instance.venue }}">
@@ -32,15 +32,26 @@
                     <input type="hidden" name="{{ form.prefix }}-country" value="{{ form.instance.country }}">
                     <input type="hidden" name="{{ form.prefix }}-start_date" value="{{ form.instance.start_date }}">
                     <input type="hidden" name="{{ form.prefix }}-end_date" value="{{ form.instance.end_date }}">
-                    <input type="hidden" name="{{ form.prefix }}-submission_deadline" value="{{ form.instance.submission_deadline }}">
+                    <input type="hidden" name="{{ form.prefix }}-submission_deadline" value="{{ form.instance.submission_deadline }}"> {% endcomment %}
         
-                    <td>{{ form.name.value }}</td>
-                    <td>{{ form.acronym.value }}</td>
+                    {% comment %} <td>{{ form.name.value }}({{ form.acronym.value }})</td>
                     <td>{{ form.research_area.value }}</td>
                     <td>{{ form.venue.value }}, {{ form.city.value }}, {{ form.country.value }}</td>
                     <td>{{ form.start_date.value|date:"F d, Y" }}</td>
                     <td>{{ form.end_date.value|date:"F d, Y" }}</td>
-                    <td>{{ form.submission_deadline.value|date:"F d, Y" }}</td>
+                    <td>{{ form.submission_deadline.value|date:"F d, Y" }}</td> {% endcomment %}
+
+                    <td>{{ form.instance.name }}({{ form.instance.acronym }})</td>
+                    <td>{{ form.instance.research_area }}</td>
+                    <td>{{ form.instance.venue }}, {{ form.instance.city }}, {{ form.instance.country }}</td>
+                    <td>{{ form.instance.start_date|date:"F d, Y" }}</td>
+                    <td>{{ form.instance.end_date|date:"F d, Y" }}</td>
+                    <td>{{ form.instance.submission_deadline|date:"F d, Y" }}</td>
+                    <td>
+                        {% for editor in form.instance.editors.all %}
+                            {{ editor }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>   
                     <td>
                         {{ form.is_approved }}
                     </td>

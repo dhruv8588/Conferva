@@ -4,6 +4,7 @@ from django.db.models.signals import post_save, pre_save
 from django.db.models.fields.related import OneToOneField
 from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import ObjectDoesNotExist
 
 from Conferva_main import settings
 
@@ -81,6 +82,24 @@ class User(AbstractBaseUser):
         elif self.is_admin==False:
             user_role = 'Guest'
         return user_role    
+
+    # def has_related_object(self):
+    #     is_reviewer = False
+    #     try:
+    #         is_reviewer = (self.reviewer is not None)
+    #     except Reviewer.DoesNotExist:
+    #         pass
+    #     return is_reviewer
+
+    # def has_related_object(self):
+    #     try:
+    #         self.reviewer
+    #         return True
+    #     except ObjectDoesNotExist:
+    #         return False
+
+    def has_related_object(self):
+        return hasattr(self, 'reviewer')
 
     # def researched_in(self):
     #     return ", ".join([str(i) for i in self.research_areas.all()]) 
