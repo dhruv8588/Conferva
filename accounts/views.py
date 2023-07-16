@@ -6,7 +6,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.contrib.sessions.models import Session
 
-from conference.models import Conference, Paper, Paper_Reviewer
+from conference.models import Conference
+from paper.models import Paper, Paper_Reviewer
 
 from .utils import detectUser, send_verification_email
 

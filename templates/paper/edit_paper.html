@@ -3,7 +3,7 @@
   {% include 'includes/alerts.html' %}
  
   {% if not display_add_author_modal and not display_edit_author_modal %}
-    <form id="edit-paper-form" action="{% url 'edit_paper' conference_id paper.id %}" method="post" enctype="multipart/form-data">
+    <form id="edit-paper-form" action="{% url 'edit_paper' paper.id conference_id %}" method="post" enctype="multipart/form-data">
   {% endif %}
 
     {% csrf_token %}
@@ -112,12 +112,12 @@ for (var i = 0; i < formActionLinks.length; i++) {
 
     if (action=='edit_paper_delete_author'){
     if (confirm(confirmMessage)) {
-      form.action = form.action + authorId + '/' + '?action=' + action;
+      form.action = form.action + 'author/' + authorId + '/' + '?action=' + action;
       form.submit();
     }
   }
   else{
-    form.action = form.action + authorId + '/' + '?action=' + action;
+    form.action = form.action + 'author/' + authorId + '/' + '?action=' + action;
       form.submit();
   }
   });

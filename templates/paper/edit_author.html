@@ -1,10 +1,10 @@
-{% extends 'conference/add_author.html' %}
+{% extends 'paper/add_author.html' %}
 
 {% block modal-id %} id="edit_author_modal" {% endblock modal-id %}
 
 {% block modal-title %}<i class="fas fa-edit"></i>&nbsp;&nbsp; Edit Author</h5>{% endblock modal-title %}
 
-{% block action %} action="{% url 'edit_author' conference_id paper.id author_id %}" {% endblock action %}
+{% block action %} action="{% url 'edit_author' paper.id conference_id author_id %}" {% endblock action %}
 
 {% block btn-action %}<i class="fas fa-edit"></i>&nbsp;&nbsp;Save Changes{% endblock btn-action %}
 
