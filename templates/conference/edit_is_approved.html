@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
 
+{% include 'includes/admin_navbar.html' %}
+
 <form action="{% url 'edit_is_approved' %}" method="post">
     {% csrf_token %}
     {{ formset.management_form }}

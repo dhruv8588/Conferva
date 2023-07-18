@@ -42,13 +42,18 @@ class UserManager(BaseUserManager):
         return user
 
 
-
 class User(AbstractBaseUser):
+    ROLE_CHOICE = (
+        ('Author', 'Author'),
+        ('Editor', 'Editor'),
+    )
+
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(max_length=100, unique=True)
-    # research_areas = models.ManyToManyField(ResearchArea, blank=True)
+    role = models.CharField(choices=ROLE_CHOICE, max_length=20, blank=True, null=True)
+    # research_areas = models.ManyToManyField(ResearchArea, blank=True, null=True)
     # research_areas = ArrayField(models.CharField(max_length=10, blank=True), size=3, blank=True, null=True)
 
     # required fields
@@ -75,13 +80,13 @@ class User(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return True
     
-    def get_role(self):
-        user_role = ""
-        if self.is_admin==True:
-            user_role = 'Admin'
-        elif self.is_admin==False:
-            user_role = 'Guest'
-        return user_role    
+    # def get_role(self):
+    #     user_role = ""
+    #     if self.is_admin==True:
+    #         user_role = 'Admin'
+    #     elif self.is_admin==False:
+    #         user_role = 'Guest'
+    #     return user_role    
 
     # def has_related_object(self):
     #     is_reviewer = False
@@ -98,8 +103,8 @@ class User(AbstractBaseUser):
     #     except ObjectDoesNotExist:
     #         return False
 
-    def has_related_object(self):
-        return hasattr(self, 'reviewer')
+    # def has_related_object(self):
+    #     return hasattr(self, 'reviewer')
 
     # def researched_in(self):
     #     return ", ".join([str(i) for i in self.research_areas.all()]) 
@@ -111,20 +116,20 @@ class ResearchArea(models.Model):
     def __str__(self):
         return self.name
 
-class UserProfile(models.Model):
-    user = OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
-    profile_picture = models.ImageField(upload_to='users/profile_pictures', blank=True)
-    country = models.CharField(max_length=15, blank=True)
-    organisation = models.CharField(max_length=15, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now=True)
+# class UserProfile(models.Model):
+#     user = OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
+#     profile_picture = models.ImageField(upload_to='users/profile_pictures', blank=True)
+#     country = models.CharField(max_length=15, blank=True)
+#     organisation = models.CharField(max_length=15, blank=True)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     modified_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.user.email    
+#     def __str__(self):
+#         return self.user.email    
     
-class LoggedInUser(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='logged_in_user', on_delete=models.CASCADE)
-    session_key = models.CharField(max_length=32, blank=True, null=True)    
+# class LoggedInUser(models.Model):
+#     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='logged_in_user', on_delete=models.CASCADE)
+#     session_key = models.CharField(max_length=32, blank=True, null=True)    
 
-    def __str__(self):
-        return self.user.username
+#     def __str__(self):
+#         return self.user.username

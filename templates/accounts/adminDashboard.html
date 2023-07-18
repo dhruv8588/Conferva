@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% include 'includes/admin_sidebar.html' %}
+    {% include 'includes/admin_navbar.html' %}  
+    
     <h4>Welcome {{ user.first_name }}</h4>
-    <p>{{ user.get_role }}'s Dashboard</p>
-    {% include 'includes/alerts.html' %}
+    <p>Admin's Dashboard</p>
+    
 {% endblock %}

@@ -1,0 +1,27 @@
+{% if user.is_authenticated %} 
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">Conferva</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+        <a class="nav-link" href="{% url 'home' %}">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'edit_is_approved' %}">Conference Approval</a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link" href="{% url 'edit_profile' user.id %}">Edit Profile</a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link" href="{% url 'reset_password' %}">Change Password</a>
+      </li>
+  </ul>           
+  </div>
+</nav>
+{% endif %}  

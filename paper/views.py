@@ -193,8 +193,10 @@ def submit_paper(request, paper_id=None, conference_id=None, author_id=None):
     if request.method == 'POST':
         form = PaperForm(request.POST, request.FILES, instance=paper)
         formset = KeywordsFormSet(request.POST, prefix='keywords', instance=paper)
-        paper = form.save()   
+          
         if form.is_valid() and formset.is_valid():
+            paper = form.save() 
+            
             for kform in formset:
                 keyword = kform.save(commit=False)
                 if keyword.name != '':

@@ -2,11 +2,11 @@
 {% load static %}
 {% block content %}
 
-  {% include 'includes/alerts.html' %}
+  {% include 'includes/editor_navbar.html' %}
 
   <script src="{% url 'js-catlog' %}"></script>
   <script src="{% static '/admin/js/core.js' %}"></script>
-  <link rel="stylesheet" href="{% static 'admin/css/base.css' %}">
+  {% comment %} <link rel="stylesheet" href="{% static 'admin/css/base.css' %}"> {% endcomment %}
   <link rel="stylesheet" href="{% static 'admin/css/widgets.css' %}">
 
   {% if not display_add_editor_modal and not display_edit_editor_modal %}

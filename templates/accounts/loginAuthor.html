@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  
+  <h2>Login as an Author</h2>
+  <form action="{% url 'loginAuthor' %}" method="post">
+    {% csrf_token %}
+    <div class="form-row">
+        <div class="form-group col-md-6">
+          <label>Username</label>
+          <input type="text" name="username" placeholder="Enter your username"/>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="Enter your password"/>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button><br/>
+    <a href="{% url 'forgot_password' %}">Forgot password</a><br/>
+    <a href="{% url 'registerAuthor' %}">Register</a>
+  </form>
+  
+{% endblock %}

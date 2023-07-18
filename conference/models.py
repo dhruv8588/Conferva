@@ -32,7 +32,7 @@ class Conference(models.Model):
         (True, 'Approved'),
         (False, 'Not Approved'),
     )
-    creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    creator = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     editors = models.ManyToManyField(Editor, blank=True)
     name = models.CharField(max_length=200, unique=True)
     acronym = models.CharField(max_length=100, unique=True)
@@ -40,7 +40,7 @@ class Conference(models.Model):
     venue = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     country = models.CharField(max_length=100)
-    web_page = models.URLField(max_length=100, blank=True)
+    web_page = models.URLField(max_length=100, blank=True, null=True)
     start_date = models.DateField()
     end_date = models.DateField()
     submission_deadline = models.DateField()

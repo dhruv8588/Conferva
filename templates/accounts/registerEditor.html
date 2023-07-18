@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block content %} 
+
+<h2>Register to be an Editor</h2>
+<form enctype="multipart/form-data" class="container" {% block action %}action="{% url 'registerEditor' %}"{% endblock %} method="post" id="user_form">
+  {% csrf_token %}
+  <div class="form-row">
+    <div class="form-group col-md-4">
+      <label>First name</label> {{ form.first_name }}
+    </div>
+    {% comment %}
+      <input type="text" name="first_name" placeholder="Enter your first name" value="{{ form.first_name.value }}"/>
+    {% endcomment %}
+    <div class="form-group col-md-4">
+      <label>Last name</label> {{ form.last_name }}
+    </div>
+    <div class="form-group col-md-4">
+      <label>Email address</label> {{ form.email }}
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Submit</button>
+
+  <ul class='errorList'>
+    {% for field in form %}
+        {% if field.errors %}
+            {% for error in field.errors %}
+                <li style="color: red;">{{ error }}</li>
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+    
+    {% for error in non_field_errors %}
+      <li style="color: red;">{{ error }}</li>
+    {% endfor %}  
+  </ul>  
+
+</form>
+
+{% endblock %}

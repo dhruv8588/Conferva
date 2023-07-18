@@ -3,6 +3,8 @@
 
 {% block content %}
 
+{% include 'includes/editor_navbar.html' %}
+
 {% if display_add_reviewer_modal %}
     {% include 'conference/add_reviewer.html' %}
 {% endif %}
@@ -19,8 +21,8 @@
     {% include 'conference/reviewer_info.html' %}
 {% endif %}
 
+<h3>Papers submitted to the <i>{{ conference.name }} ({{ conference.acronym }})</i></h3>
 {% if papers %}
-    <h3>Papers submitted to the <i>{{ conference.name }} ({{ conference.acronym }})</i></h3>
     <table class="table">
     <thead>
         <tr>
@@ -67,6 +69,8 @@
         {% endfor %}    
     </tbody>
     </table>
+{% else %}    
+No papers have been submitted yet!!
 {% endif %}
 
 {% endblock %}

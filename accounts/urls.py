@@ -4,15 +4,19 @@ from . import views
 
 urlpatterns = [
     path('', views.myAccount),
-    path('register_user/', views.registerUser, name='register_user'),
+    path('registerAuthor/', views.registerAuthor, name='registerAuthor'),
+    path('registerEditor/', views.registerEditor, name='registerEditor'),
     path('edit_profile/<int:user_id>/', views.edit_profile, name='edit_profile'),
 
-    path('login/', views.login, name="login"),
+    path('loginAuthor/', views.loginAuthor, name="loginAuthor"),
+    path('loginEditor/', views.loginEditor, name="loginEditor"),
+    path('loginAdmin/', views.loginAdmin, name="loginAdmin"),
     path('logout/', views.logout, name="logout"),
     
     path('myAccount/', views.myAccount, name='myAccount'),
 
-    path('guestDashboard/', views.guestDashboard, name="guestDashboard"),
+    path('authorDashboard/', views.authorDashboard, name="authorDashboard"),
+    path('editorDashboard/', views.editorDashboard, name="editorDashboard"),
     path('adminDashboard/', views.adminDashboard, name="adminDashboard"),
 
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),

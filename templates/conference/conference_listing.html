@@ -1,11 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            {% include 'includes/alerts.html' %}
-        </div>
-    </div>
+
+    {% include 'includes/author_navbar.html' %}
+
     <div class="input-group input-group-sm mb-3 mt-2">
         <input type="text" onkeyup="searchFunction()" class="form-control" id="search" placeholder="Search for...">
         <a href="{% url 'conference_listing' %}" class="btn btn-dark"><i class="fas fa-sync-alt"></i></a>

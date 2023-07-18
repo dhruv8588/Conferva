@@ -53,9 +53,10 @@ def create_conference(request, conference_id=None, editor_id=None):
     url_name = resolve(request.path_info).url_name
 
     if request.method == 'POST':
-        form = ConferenceForm(request.POST, instance=conference)
-        conference = form.save()   
+        form = ConferenceForm(request.POST, instance=conference)  
         if form.is_valid():
+            conference = form.save() 
+            
             is_creator_editor = form.cleaned_data['is_creator_editor']
             if is_creator_editor == True:
                 editors = Editor.objects.all()
@@ -130,6 +131,7 @@ def create_conference(request, conference_id=None, editor_id=None):
     elif url_name == 'edit_conference':
         return render(request, 'conference/edit_conference.html', context)
 
+
 def add_editor(request, conference_id):
     url_name = resolve(request.path_info).url_name
     if url_name == 'add_editor':
@@ -196,6 +198,9 @@ def delete_editor(request, conference_id, editor_id):
     conference.editors.remove(editor_id)
 
     editor = get_object_or_404(Editor, id=editor_id)
+
+    if editor.user:
+        return x
 
     conferences = Conference.objects.all()
     for conference in conferences:
@@ -289,7 +294,6 @@ def edit_editor(request, conference_id, editor_id):
     elif url_name == 'edit_conference_edit_editor': 
         y = render(request, 'conference/edit_conference_edit_editor.html', context)
     return y       
-
 
 @login_required(login_url='login')
 @user_passes_test(check_role_admin)

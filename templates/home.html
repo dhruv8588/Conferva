@@ -7,28 +7,41 @@
     <div class="col-sm-4 mb-3 mb-sm-0">
         <div class="card">
         <div class="card-body">
-            <h5 class="card-title">Submit your paper and be a reviewer</h5>
-            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
+            <h5 class="card-title">Be an Author!</h5>
+            <p class="card-text">Share your research by submitting your own paper and engage in peer review by offering insightful feedback as a reviewer to fellow authors' work.</p>
+            {% if user.role == 'Author' %}
+                <a href="{% url 'authorDashboard' %}" class="btn btn-primary">Author</a>
+            {% else %}
+                <a href="{% url 'loginAuthor' %}" class="btn btn-primary">Author</a>
+            {% endif %}  
         </div>
         </div>
     </div>
     <div class="col-sm-4">
         <div class="card">
         <div class="card-body">
-            <h5 class="card-title">Be a Editor to a Conference!</h5>
-            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
+            <h5 class="card-title">Be an Editor to a Conference!</h5>
+            <p class="card-text">Join as an editor for the conference and help organize the submissions to make a significant impact on academic discussions.</p>
+            {% if user.role == 'Editor' %}
+                <a href="{% url 'editorDashboard' %}" class="btn btn-primary">Editor</a>
+            {% else %}
+                <a href="{% url 'loginEditor' %}" class="btn btn-primary">Editor</a>
+            {% endif %}    
         </div>
         </div>
     </div>
     <div class="col-sm-4">
         <div class="card">
         <div class="card-body">
-            <h5 class="card-title">Admin</h5>
-            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
+            <h5 class="card-title">Only Admin please!</h5>
+            <p class="card-text">Take on the vital role of an administrator, granting approval for conferences requested to be hosted on our website.</p>
+            {% if user.is_admin %}
+                <a href="{% url 'adminDashboard' %}" class="btn btn-primary">Admin</a>
+            {% else %}
+                <a href="{% url 'loginAdmin' %}" class="btn btn-primary">Admin</a>
+            {% endif %}    
         </div>
         </div>
     </div>
+    
 {% endblock %}

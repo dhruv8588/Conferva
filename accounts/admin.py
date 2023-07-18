@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ResearchArea, User, UserProfile
+from .models import ResearchArea, User
 from django.contrib.auth.admin import UserAdmin
 
 # Register your models here.
@@ -11,7 +11,8 @@ class CustomUserAdmin(UserAdmin):
     inlines = [
         ResearchAreaInline,
     ]
-    list_display = ('id', 'email', 'first_name', 'last_name', 'username', 'is_admin', 'is_active', 'research_areas')
+    list_display = ('id', 'email', 'first_name', 'last_name', 'role', 'username', 'is_admin', 'is_active', 'research_areas')
+    list_editable = ('role',)
     ordering = ('-date_joined',)
     filter_horizontal = ()
     list_filter = ()
@@ -24,6 +25,5 @@ class ResearchAreaAdmin(admin.ModelAdmin):
     list_display = ['name', 'user']
 
 admin.site.register(User, CustomUserAdmin)
-admin.site.register(UserProfile)
 admin.site.register(ResearchArea, ResearchAreaAdmin)
 
