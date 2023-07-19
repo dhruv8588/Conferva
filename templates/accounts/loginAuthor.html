@@ -3,7 +3,12 @@
 {% block content %}
   
   <h2>Login as an Author</h2>
-  <form action="{% url 'loginAuthor' %}" method="post">
+    {% if next %}
+      <form action="{% url 'loginAuthor' %}?next={{ next }}" method="post">
+    {% else %}
+      <form action="{% url 'loginAuthor' %}" method="post">
+    {% endif %}
+
     {% csrf_token %}
     <div class="form-row">
         <div class="form-group col-md-6">

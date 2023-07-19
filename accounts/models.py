@@ -51,7 +51,7 @@ class User(AbstractBaseUser):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     username = models.CharField(max_length=50, unique=True)
-    email = models.EmailField(max_length=100, unique=True)
+    email = models.EmailField(max_length=100)
     role = models.CharField(choices=ROLE_CHOICE, max_length=20, blank=True, null=True)
     # research_areas = models.ManyToManyField(ResearchArea, blank=True, null=True)
     # research_areas = ArrayField(models.CharField(max_length=10, blank=True), size=3, blank=True, null=True)
@@ -72,7 +72,7 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     def __str__(self):
-        return self.email
+        return self.username
 
     def has_perm(self, perm, obj=None):
         return self.is_admin

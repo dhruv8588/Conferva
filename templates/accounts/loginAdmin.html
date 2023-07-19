@@ -3,7 +3,12 @@
 {% block content %}
   
   <h2>Login as Admin</h2>
-  <form action="{% url 'loginAdmin' %}" method="post">
+  {% if next %}
+    <form action="{% url 'loginAdmin' %}?next={{ next }}" method="post">
+  {% else %}
+    <form action="{% url 'loginAdmin' %}" method="post">
+  {% endif %}    
+
     {% csrf_token %}
     <div class="form-row">
         <div class="form-group col-md-6">

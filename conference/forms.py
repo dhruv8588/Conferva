@@ -51,6 +51,11 @@ ConferenceModelFormset = modelformset_factory(
     # },
 )
 
+class AlternateConferenceForm(forms.ModelForm):
+    class Meta:
+        model = Conference
+        fields = ['is_approved']
+
 # class ReviewerForm(forms.Form):
 #     email = forms.EmailField()       
 

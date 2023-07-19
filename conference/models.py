@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models.fields.related import OneToOneField
 from accounts.models import User
 
-from .utils import send_notification
+from .utils import send_conference_approval_status_email
 
 # Create your models here.
 
@@ -61,18 +61,12 @@ class Conference(models.Model):
         if self.pk is not None:
             orig = Conference.objects.get(pk=self.pk)
             if orig.is_approved != self.is_approved:
-                mail_template = 'accounts/emails/admin_approval.html'
-                context = {
-                    'user': self.creator,
-                    'conference': self,
-                    'is_approved': self.is_approved,
-                }
                 if self.is_approved == True:
                     mail_subject = "Congratulations! Your request for conference creation- " + self.name + "(" + self.acronym + ")" + " has been approved."
-                    send_notification(mail_subject, mail_template, context)
+                    send_conference_approval_status_email(mail_subject, self)
                 else:
                     mail_subject = "We're sorry! Your request for conference creation- " + self.name + "(" + self.acronym + ")" + " has been rejected."
-                    send_notification(mail_subject, mail_template, context)
+                    send_conference_approval_status_email(mail_subject, self)
         return super(Conference, self).save(*args,)     
 
 

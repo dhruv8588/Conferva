@@ -1,6 +1,6 @@
 {% autoescape off %}
 
-Hi {{ user.first_name }},
+Hi {{ conference.creator.first_name }},
 
 {% if conference.is_approved %}
     Congratulations! Your request for conference creation- {{ conference.name }}({{ conference.acronym }}) has been approved.

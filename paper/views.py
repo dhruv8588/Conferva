@@ -1,9 +1,10 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.urls import resolve
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 import hashlib
 from django.db.models import Q
+from django.core.exceptions import PermissionDenied
 
 from accounts.models import User
 from conference.models import Conference
@@ -12,6 +13,12 @@ from .forms import AuthorForm, KeywordsFormSet, PaperForm, ReviewForm
 from .models import Author, Paper, Paper_Reviewer, Review
 
 # Create your views here.
+
+def check_role_author(user):
+    if user.role == 'Author':
+        return True
+    else:
+        raise PermissionDenied  
 
 def add_author(request, paper_id, conference_id):
     url_name = resolve(request.path_info).url_name
@@ -39,11 +46,14 @@ def add_author(request, paper_id, conference_id):
                     return x
                 
             author = aform.save(commit=False)
-            users = User.objects.all()
-            for user in users:
-                if user.email == email:
-                    author.user = user
-                    break
+
+            try:
+                user = User.objects.get(email=email, role='Author')
+            except:
+                user = None     
+            if user: 
+                author.user = user
+
             author.email = email
             aform.save()
 
@@ -124,11 +134,14 @@ def edit_author(request, paper_id, conference_id, author_id):
                                 last_name = author.last_name,
                                 email = author.email
                             )
-                            users = User.objects.all()
-                            for user in users:
-                                if user.email == new_author.email:
-                                    new_author.user = user
-                                    break
+
+                            try:
+                                user = User.objects.get(email=new_author.email, role='Author')
+                            except:
+                                user = None   
+                            if user: 
+                                new_author.user = user
+
                             new_author.save()
                             paper.authors.add(new_author.id)
                             flag2 = 1
@@ -328,7 +341,8 @@ def delete_paper(request, paper_id):
     messages.success(request, 'Paper has been deleted successfully!')            
     return redirect('myAccount')
 
-
+@login_required(login_url='loginAuthor')
+@user_passes_test(check_role_author)
 def accept_or_decline_to_review(request, paper_id):
     paper = Paper.objects.get(id=paper_id)
     context = {

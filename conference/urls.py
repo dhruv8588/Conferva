@@ -24,8 +24,8 @@ urlpatterns = [
     path('edit_conference/<int:conference_id>/edit_editor/<int:editor_id>/', views.edit_editor, name='edit_conference_edit_editor'),
     path('edit_conference/<int:conference_id>/delete_editor/<int:editor_id>/', views.delete_editor, name='edit_conference_delete_editor'),
 
-
-    path('edit_is_approved/', views.edit_is_approved, name='edit_is_approved'),
+    path('edit_is_approved_all/', views.edit_is_approved_all, name='edit_is_approved_all'),
+    path('<int:conference_id>/edit_is_approved/', views.edit_is_approved, name='edit_is_approved'),
 
     path('<int:conference_id>/view_papers/', views.view_papers, name='view_papers'),
     path('<int:conference_id>/paper/<int:paper_id>/add_reviewer/', views.add_reviewer, name='add_reviewer'),

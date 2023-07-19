@@ -11,11 +11,11 @@ from django.core.paginator import Paginator
 
 from accounts.models import User
 from conference.models import Conference, Editor
-from paper.models import Paper, Reviewer
-from conference.utils import send_review_invitation
+from paper.models import Paper, Paper_Reviewer, Reviewer
+from conference.utils import send_conference_approval_request_email, send_review_invitation_email
 # from .utils import send_approval_request_email
 
-from .forms import ConferenceModelFormset, UserModelFormset, ConferenceForm, EditorForm, ReviewerForm
+from .forms import AlternateConferenceForm, ConferenceModelFormset, UserModelFormset, ConferenceForm, EditorForm, ReviewerForm
 
 def check_role_admin(user):
     if user.is_admin == True:
@@ -110,9 +110,7 @@ def create_conference(request, conference_id=None, editor_id=None):
                 return redirect('edit_conference_add_editor', conference.id)
             
             if url_name == 'create_conference':        
-                mail_subject = 'Request for conference approval'
-                email_template = 'accounts/emails/approval_request.html'
-                # send_approval_request_email(request, mail_subject, email_template)
+                send_conference_approval_request_email(request, conference.id)
 
                 messages.success(request, 'Your conference has been registered sucessfully! Please wait for the approval.')
             elif url_name == 'edit_conference':
@@ -159,11 +157,14 @@ def add_editor(request, conference_id):
                     return x
                 
             editor = eform.save(commit=False)
-            users = User.objects.all()
-            for user in users:
-                if user.email == email:
-                    editor.user = user
-                    break
+
+            try:
+                user = User.objects.get(email=email, role='Editor')
+            except:
+                user = None     
+            if user: 
+                editor.user = user
+
             editor.email = email
             eform.save()
 
@@ -261,11 +262,14 @@ def edit_editor(request, conference_id, editor_id):
                                 last_name = editor.last_name,
                                 email = editor.email
                             )
-                            users = User.objects.all()
-                            for user in users:
-                                if user.email == new_editor.email:
-                                    new_editor.user = user
-                                    break
+
+                            try:
+                                user = User.objects.get(email=new_editor.email, role='Editor')
+                            except:
+                                user = None   
+                            if user: 
+                                new_editor.user = user
+
                             new_editor.save()
                             conference.editors.add(new_editor.id)
                             flag2 = 1
@@ -295,9 +299,9 @@ def edit_editor(request, conference_id, editor_id):
         y = render(request, 'conference/edit_conference_edit_editor.html', context)
     return y       
 
-@login_required(login_url='login')
+@login_required(login_url='loginAdmin')
 @user_passes_test(check_role_admin)
-def edit_is_approved(request):
+def edit_is_approved_all(request):
     if request.method == 'POST':
         formset = ConferenceModelFormset(request.POST, queryset=Conference.objects.all())
         # flag = 0
@@ -322,15 +326,40 @@ def edit_is_approved(request):
     context = {
         'formset': formset,
     }
-    return render(request, 'conference/edit_is_approved.html', context)
+    return render(request, 'conference/edit_is_approved_all.html', context)
+
+@login_required(login_url='loginAdmin')
+@user_passes_test(check_role_admin)
+def edit_is_approved(request, conference_id):
+    conference = Conference.objects.get(id=conference_id)
+    if request.method == 'POST':
+        form = AlternateConferenceForm(request.POST, instance=conference)
+
+        if form.is_valid():
+            form.save()
+
+            return redirect('edit_is_approved_all')
+        else:
+            print(form.errors)
+    else:
+        form = AlternateConferenceForm(instance=conference)
+
+    context = {
+        'form': form
+    }
+    return render(request, 'conference/edit_is_approved.html', context)    
 
 
 def view_papers(request, conference_id):
     papers = Paper.objects.filter(conference=conference_id).order_by('created_at')
     conference = Conference.objects.get(id = conference_id)
+
+    paper_reviewers = Paper_Reviewer.objects.filter(paper__in=papers)
+
     context = {
         "papers": papers,
         "conference": conference,
+        "paper_reviewers": paper_reviewers
     } 
     return render(request, 'conference/view_papers.html', context)
 
@@ -355,6 +384,7 @@ def edit_reviewer(request, conference_id, paper_id, reviewer_id):
                 for other_reviewer in other_reviewers:
                     if other_reviewer.email == entered_email:
                         target_paper.reviewers.add(other_reviewer.id)
+                        send_review_invitation_email(request, reviewer, target_paper.id)
                         other_reviewer.first_name = reviewer.first_name #
                         other_reviewer.last_name = reviewer.last_name #
                         other_reviewer.save() #
@@ -389,6 +419,8 @@ def edit_reviewer(request, conference_id, paper_id, reviewer_id):
                                     break
                             new_reviewer.save()
                             target_paper.reviewers.add(new_reviewer.id)
+                            send_review_invitation_email(request, reviewer, target_paper.id)
+                            
                             flag2 = 1
                     if flag2 == 0:
                         reviewer.save()
@@ -427,8 +459,7 @@ def add_new_reviewer(request, conference_id, paper_id):
                 if reviewer.email == email:
                     paper.reviewers.add(reviewer.id)
 
-                    # email_template = 'accounts/emails/review_invitation.html'
-                    # send_review_invitation(request, reviewer.user, email_template)
+                    send_review_invitation_email(request, reviewer, paper.id)
 
                     reviewer.first_name = form.cleaned_data['first_name'] #
                     reviewer.last_name = form.cleaned_data['last_name'] #
@@ -446,8 +477,8 @@ def add_new_reviewer(request, conference_id, paper_id):
             form.save()
 
             paper.reviewers.add(reviewer.id)
-            # email_template = 'accounts/emails/review_invitation.html'
-            # send_review_invitation(request, reviewer.user, email_template)
+
+            send_review_invitation_email(request, reviewer, paper.id)
 
             return redirect('view_papers', conference_id)
         else:
@@ -482,11 +513,13 @@ def add_reviewer(request, conference_id, paper_id):
                 for reviewer in reviewers:
                     if reviewer.user == user:
                         paper.reviewers.add(reviewer.id)
+                        send_review_invitation_email(request, reviewer, paper.id)
                         flag = 1
                 if flag == 0:
                     reviewer = Reviewer.objects.create(user=user, first_name=user.first_name, last_name=user.last_name, email=user.email)
                     reviewer.save()
                     paper.reviewers.add(reviewer)  
+                    send_review_invitation_email(request, reviewer, paper.id)
                 
         return redirect('view_papers', conference_id)
     else:
@@ -501,7 +534,7 @@ def add_reviewer(request, conference_id, paper_id):
 
         # only filter(), all() and exclude() methods on User.objects will return the queryset; get() method won't
         keywords = paper.keywords.all()
-        users = User.objects.all()
+        users = User.objects.filter(role='Author')
         id_list = []
 
         for user in users:

@@ -1,3 +1,5 @@
+from django import forms
+from django.http import HttpResponseRedirect
 from django.utils.http import urlsafe_base64_decode
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages, auth
@@ -5,9 +7,10 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.contrib.sessions.models import Session
+from itertools import chain, groupby
 
 from conference.models import Conference, Editor
-from paper.models import Paper, Paper_Reviewer
+from paper.models import Author, Paper, Paper_Reviewer
 
 from .utils import detectUser, send_verification_email
 
@@ -38,15 +41,31 @@ def registerAuthor(request):
         return redirect('myAccount')
     elif request.method=='POST':
         form = UserForm(request.POST)
+
+        email = request.POST['email']
+        try:
+            user = User.objects.get(email=email, role='Author')
+        except:
+            user = None
+        if user:
+            form.add_error(None, "Author with this Email already exists.") 
+
         formset = ResearchAreaFormSet(request.POST, prefix='research_areas')
         if form.is_valid() and formset.is_valid():
 
             user = form.save(commit=False)
-            user.username = user.email.split("@")[0]
+            user.username = user.email.split("@")[0] + 'A'
             password = User.objects.make_random_password()
             user.set_password(password)
             user.role = 'Author'
             user.save()
+
+            try:
+                author = Author.objects.get(email=user.email)
+            except:
+                author = None
+            if author:
+                author.user = user  
 
             for form in formset:
                 research_area = form.save(commit=False)
@@ -78,29 +97,29 @@ def registerEditor(request):
         return redirect('myAccount')
     elif request.method=='POST':
         form = UserForm(request.POST)
+
+        email = request.POST['email']
+        try:
+            user = User.objects.get(email=email, role='Editor')
+        except:
+            user = None
+        if user:
+            form.add_error(None, "Editor with this Email already exists.") 
+
         if form.is_valid():
             user = form.save(commit=False)
-            user.username = user.email.split("@")[0]
+            user.username = user.email.split("@")[0] + 'E'
             password = User.objects.make_random_password()
             user.set_password(password)
             user.role = 'Editor'
             user.save()
 
-            flag = 0
-            editors = Editor.objects.all()
-            for editor in editors:
-                if editor.email == user.email:
-                    editor.user = user
-                    flag = 1
-
-            if flag == 0:
-                new_editor = Editor.objects.create(
-                                            first_name = user.first_name,
-                                            last_name = user.last_name,
-                                            email = user.email,
-                                            user = user,
-                                        )
-                new_editor.save()
+            try:
+                editor = Editor.objects.get(email=user.email)
+            except:
+                editor = None
+            if editor:
+                editor.user = user        
 
             mail_subject = 'Please activate your account'
             email_template = 'accounts/emails/account_verification.html'
@@ -117,44 +136,6 @@ def registerEditor(request):
         'non_field_errors': form.non_field_errors(),
     }
     return render(request, 'accounts/registerEditor.html', context)
-
-
-# def edit_profile(request, user_id):
-#     user = User.objects.get(id=user_id)
-#     if request.method=='POST':
-#         form = UserForm(request.POST, instance=user)
-#         formset = ResearchAreaFormSet(request.POST, prefix='research_areas', instance=user)
-#         if form.is_valid() and formset.is_valid():
-
-#             user = form.save(commit=False)
-#             user.save()
-
-#             for form in formset:
-#                 research_area = form.save(commit=False)
-#                 if research_area.name != '':
-#                     research_area.user = user
-#                     research_area.save()
-#                 elif research_area.name == '' and form.instance.id:
-#                     form.instance.delete()
-                
-#             messages.success(request, 'Your profile has been edited sucessfully!')
-#             return redirect('myAccount')
-#         else:
-#             print(form.errors)
-#             print(formset.errors)
-#             for form in formset:
-#                 print(form.errors)
-#     else:
-#         form = UserForm(instance=user)
-#         formset = ResearchAreaFormSet(prefix='research_areas', instance=user)
-#     context = {
-#         'form': form,
-#         'formset': formset,
-#         'non_field_errors': form.non_field_errors(),
-#         'user': user
-#     }
-#     return render(request, 'accounts/edit_profile.html', context)
-
 
 def edit_profile(request, user_id):
     user = User.objects.get(id=user_id)
@@ -236,6 +217,11 @@ def activate(request, uidb64, token):
         return  redirect('loginAuthor')    
 
 def loginAuthor(request):
+    try:
+        next = request.GET['next']  
+    except:
+        next = "" 
+
     if request.user.is_authenticated and request.user.role == 'Author':
         messages.warning(request, 'You are already logged in!')
         return redirect('myAccount')
@@ -249,23 +235,24 @@ def loginAuthor(request):
             auth.login(request, user)
             messages.success(request, 'You are now logged in.')
 
-            # current_session_key = user.logged_in_user.session_key
-
-            # if current_session_key and current_session_key != request.session.session_key:
-            #     Session.objects.get(session_key=current_session_key).delete() 
-
-            # user.logged_in_user.session_key = request.session.session_key
-            # user.logged_in_user.save()
-
-
-            return redirect('myAccount')
+            if next == "":
+                return HttpResponseRedirect('/loginAuthor/')
+            else:
+                return HttpResponseRedirect(next)
         else:
             messages.error(request, 'Invalid login credentials')
-            return redirect('loginAuthor')
-
-    return render(request, 'accounts/loginAuthor.html')
+            
+    context = {
+        'next': next
+    }  
+    return render(request, 'accounts/loginAuthor.html', context)
 
 def loginEditor(request):
+    try:
+        next = request.GET['next']  
+    except:
+        next = "" 
+
     if request.user.is_authenticated and request.user.role == 'Editor':
         messages.warning(request, 'You are already logged in!')
         return redirect('myAccount')
@@ -279,15 +266,25 @@ def loginEditor(request):
             auth.login(request, user)
             messages.success(request, 'You are now logged in.')
 
-            return redirect('myAccount')
+            if next == "":
+                return HttpResponseRedirect('/loginEditor/')
+            else:
+                return HttpResponseRedirect(next)
         else:
             messages.error(request, 'Invalid login credentials')
-            return redirect('loginEditor')
+        
+    context = {
+        'next': next
+    }  
+    return render(request, 'accounts/loginEditor.html', context)
 
-    return render(request, 'accounts/loginEditor.html')
+def loginAdmin(request):  
+    try:
+        next = request.GET['next']  
+    except:
+        next = ""  
 
-def loginAdmin(request):
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and request.user.is_admin:
         messages.warning(request, 'You are already logged in!')
         return redirect('myAccount')
     elif request.method=="POST":
@@ -300,12 +297,17 @@ def loginAdmin(request):
             auth.login(request, user)
             messages.success(request, 'You are now logged in.')
 
-            return redirect('myAccount')
+            if next == "":
+                return HttpResponseRedirect('/loginAdmin/')
+            else:
+                return HttpResponseRedirect(next)
         else:
             messages.error(request, 'Invalid login credentials')
-            return redirect('loginAdmin')
 
-    return render(request, 'accounts/loginAdmin.html')
+    context = {
+        'next': next
+    }       
+    return render(request, 'accounts/loginAdmin.html', context)
 
 
 def logout(request):
@@ -321,9 +323,18 @@ def myAccount(request):
 @login_required(login_url='loginAuthor')
 @user_passes_test(check_role_author)
 def authorDashboard(request):
-    papers = Paper.objects.filter(submitter=request.user)
     paper_reviewers = Paper_Reviewer.objects.filter(reviewer__user=request.user)
     
+    try:
+        author = Author.objects.get(user=request.user)
+    except:
+        author = None
+
+    papers_qs1 = Paper.objects.filter(submitter=request.user)
+    papers_qs2 = Paper.objects.filter(authors__in=[author])
+    papers = papers_qs1 | papers_qs2
+    papers = papers.distinct()
+
     context = {
         "papers": papers,
         "paper_reviewers": paper_reviewers
@@ -333,7 +344,17 @@ def authorDashboard(request):
 @login_required(login_url='loginEditor')
 @user_passes_test(check_role_editor)
 def editorDashboard(request):
-    conferences = Conference.objects.filter(creator=request.user)
+
+    try:
+        editor = Editor.objects.get(user=request.user)
+    except:
+        editor = None
+
+    conferences_qs1 = Conference.objects.filter(creator=request.user)
+    conferences_qs2 = Conference.objects.filter(editors__in=[editor])
+
+    conferences = conferences_qs1 | conferences_qs2 # qs1.union(qs2, qs3)
+    conferences = conferences.distinct()
 
     context = {
         "conferences": conferences,
