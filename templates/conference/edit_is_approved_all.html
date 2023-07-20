@@ -1,49 +1,68 @@
 {% extends 'base.html' %}
+
 {% block content %}
+<style>
+    /* Custom CSS Styles */
+    .table-container {
+        max-width: 1000px;
+        margin: 20px auto;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ebebeb;
+    }
+
+    .table th {
+        font-weight: bold;
+    }
+
+    .table tr:hover {
+        background-color: #f5f5f5;
+    }
+
+    .btn-submit {
+        margin-top: 10px;
+    }
+</style>
 
 {% include 'includes/admin_navbar.html' %}
 
-<form action="{% url 'edit_is_approved_all' %}" method="post">
-    {% csrf_token %}
-    {{ formset.management_form }}
+<div class="table-container">
+    <form action="{% url 'edit_is_approved_all' %}" method="post">
+        {% csrf_token %}
+        {{ formset.management_form }}
 
-    <table class="table">
-        <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Name</th>
-            <th scope="col">Research area</th>
-            <th scope="col">Where</th>
-            <th scope="col">Start date</th>
-            <th scope="col">End date</th>
-            <th scope="col">Submission Deadline</th>
-            <th scope="col">Editors</th>
-            <th scope="col">Is approved</th>    
-        </tr>
-        </thead>
-        <tbody>
-            {% for form in formset %}
+        <table class="table">
+            <thead>
                 <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
-                    <input type="hidden" name="{{ form.prefix }}-id" value="{{ form.instance.id }}">
-                    {% comment %} <input type="hidden" name="{{ form.prefix }}-name" value="{{ form.instance.name }}">
-                    <input type="hidden" name="{{ form.prefix }}-acronym" value="{{ form.instance.acronym }}">
-                    <input type="hidden" name="{{ form.prefix }}-research_area" value="{{ form.instance.research_area }}">
-                    <input type="hidden" name="{{ form.prefix }}-venue" value="{{ form.instance.venue }}">
-                    <input type="hidden" name="{{ form.prefix }}-city" value="{{ form.instance.city }}">
-                    <input type="hidden" name="{{ form.prefix }}-country" value="{{ form.instance.country }}">
-                    <input type="hidden" name="{{ form.prefix }}-start_date" value="{{ form.instance.start_date }}">
-                    <input type="hidden" name="{{ form.prefix }}-end_date" value="{{ form.instance.end_date }}">
-                    <input type="hidden" name="{{ form.prefix }}-submission_deadline" value="{{ form.instance.submission_deadline }}"> {% endcomment %}
-        
-                    {% comment %} <td>{{ form.name.value }}({{ form.acronym.value }})</td>
-                    <td>{{ form.research_area.value }}</td>
-                    <td>{{ form.venue.value }}, {{ form.city.value }}, {{ form.country.value }}</td>
-                    <td>{{ form.start_date.value|date:"F d, Y" }}</td>
-                    <td>{{ form.end_date.value|date:"F d, Y" }}</td>
-                    <td>{{ form.submission_deadline.value|date:"F d, Y" }}</td> {% endcomment %}
-
-                    <td><a href="{% url 'edit_is_approved' form.instance.id %}">{{ form.instance.name }}({{ form.instance.acronym }})</a></td>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Research Area</th>
+                    <th>Location</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Submission Deadline</th>
+                    <th>Editors</th>
+                    <th>Is Approved</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in formset %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <a href="{% url 'edit_is_approved' form.instance.id %}">
+                            {{ form.instance.name }} ({{ form.instance.acronym }})
+                        </a>
+                    </td>
                     <td>{{ form.instance.research_area }}</td>
                     <td>{{ form.instance.venue }}, {{ form.instance.city }}, {{ form.instance.country }}</td>
                     <td>{{ form.instance.start_date|date:"F d, Y" }}</td>
@@ -51,18 +70,17 @@
                     <td>{{ form.instance.submission_deadline|date:"F d, Y" }}</td>
                     <td>
                         {% for editor in form.instance.editors.all %}
-                            {{ editor }}{% if not forloop.last %}, {% endif %}
+                        {{ editor }}{% if not forloop.last %}, {% endif %}
                         {% endfor %}
-                    </td>   
+                    </td>
                     <td>
                         {{ form.is_approved }}
                     </td>
                 </tr>
-            {% endfor %}    
-        </tbody>
-    </table>
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form> 
-
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary btn-submit">Submit</button>
+    </form>
+</div>
 {% endblock %}
-
