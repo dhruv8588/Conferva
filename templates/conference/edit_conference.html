@@ -8,6 +8,84 @@
     <script src="{% static '/admin/js/core.js' %}"></script>
     {% comment %} <link rel="stylesheet" href="{% static 'admin/css/base.css' %}"> {% endcomment %}
     <link rel="stylesheet" href="{% static 'admin/css/widgets.css' %}">
+    <style>
+        /* Add custom styles here */
+        .form-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container h3 {
+            color: #007BFF;
+            font-weight: bold;
+        }
+
+        .form-row {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            appearance: none;
+        }
+
+        .form-row p {
+            margin: 10px 0;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-row p a {
+            color: #007BFF;
+            margin-right: 10px;
+        }
+
+        .form-row p a:hover {
+            color: #0056b3;
+        }
+
+        .btn-dark {
+            background-color: #343a40;
+            color: #fff;
+        }
+
+        .btn-dark:hover {
+            background-color: #1d2124;
+        }
+
+        .btn-outline-dark {
+            border: 1px solid #343a40;
+            color: #343a40;
+        }
+
+        .btn-outline-dark:hover {
+            background-color: #f0f0f0;
+        }
+
+        .errorList li {
+            color: red;
+        }
+    </style>
 
     {% if not display_add_editor_modal and not display_edit_editor_modal %}
         <form id="edit-conference-form" action="{% url 'edit_conference' conference.id %}" method="post">  
@@ -16,87 +94,88 @@
     <form {% block action %}action="{% url 'create_conference' %}"{% endblock %} method="post">
     {% csrf_token %}
     {{ form.media }}
-    <div class="form-row">
-        <div class="form-group col-md-6">
-        <label>Name</label> {{ form.name }}
+    <div class="form-container">
+        <h1 class="text-center">Edit Conference</h1>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>Name</label> {{ form.name }}
+            </div>
+            <div class="form-group col-md-6">
+                <label>Acronym</label> {{ form.acronym }}
+            </div>
         </div>
-        <div class="form-group col-md-6">
-        <label>Acronym</label> {{ form.acronym }}
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>Research area</label> {{ form.research_area }}
+            </div>
+            <div class="form-group col-md-6">
+                <label>Venue</label> {{ form.venue }}
+            </div>
         </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label>Research area</label> {{ form.research_area }}
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>City</label> {{ form.city }}
+            </div>
+            <div class="form-group col-md-6">
+                <label>Country</label> {{ form.country }}
+            </div>
         </div>
-        <div class="form-group col-md-6">
-            <label>Venue</label> {{ form.venue }}
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>Web page</label> {{ form.web_page }}
+            </div>
+            <div class="form-group col-md-6">
+                <label>Start date</label> {{ form.start_date }}
+            </div>
         </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label>City</label> {{ form.city }}
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>End date</label> {{ form.end_date }}
+            </div>
+            <div class="form-group col-md-6">
+                <label>Submission deadline</label> {{ form.submission_deadline }}
+            </div>
         </div>
-        <div class="form-group col-md-6">
-            <label>Country</label> {{ form.country }}
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label>Web page</label> {{ form.web_page }}
-        </div>
-        <div class="form-group col-md-6">
-            <label>Start date</label> {{ form.start_date }}
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label>End date</label> {{ form.end_date }}
-        </div>
-        <div class="form-group col-md-6">
-            <label>Submission deadline</label> {{ form.submission_deadline }}
-        </div>
-    </div>
 
-    <p>Editors: </p> 
-    {% if conference %}
-        {% if conference.editors %}
-        {% for editor in conference.editors.all %}
-            {% if editor.email != conference.creator.email %} 
-            <p> {{ editor.first_name }} {{ editor.last_name }}
-                <a href="#" class="form-action-link" data-action="edit_conference_edit_editor" data-editor-id="{{ editor.id }}" style="color: unset;"><i class="fas fa-edit"></i></a>
-                <a href="#" class="form-action-link" data-action="edit_conference_delete_editor" data-editor-id="{{ editor.id }}"><i class="fas fa-trash text-danger"></i></a>
-            </p>
+        <p>Editors: </p> 
+        {% if conference %}
+            {% if conference.editors %}
+            {% for editor in conference.editors.all %}
+                {% if editor.email != conference.creator.email %} 
+                <p> {{ editor.first_name }} {{ editor.last_name }}
+                    <a href="#" class="form-action-link" data-action="edit_conference_edit_editor" data-editor-id="{{ editor.id }}" style="color: unset;"><i class="fas fa-edit"></i></a>
+                    <a href="#" class="form-action-link" data-action="edit_conference_delete_editor" data-editor-id="{{ editor.id }}"><i class="fas fa-trash text-danger"></i></a>
+                </p>
+                {% endif %}
+            {% endfor %}
             {% endif %}
-        {% endfor %}
         {% endif %}
-    {% endif %}
 
-    <button type="submit" name="edit_conference_add_editor" class="btn btn-dark">Add Editor</button>
+        <button type="submit" name="edit_conference_add_editor" class="btn btn-dark">Add Editor</button>
 
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label>Add yourself as editor</label> {{ form.is_creator_editor }}
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>Add yourself as editor</label> {{ form.is_creator_editor }}
+            </div>
         </div>
+
+        <button type="submit" class="btn btn-dark mb-3">Save Changes</button>
+
+        <button type="reset" class="btn btn-outline-dark mb-3 ms-2" style="width: 50px;"><i class="fas fa-sync-alt"></i></button>
+
+        <ul class='errorList'>
+            {% for field in form %}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <li>{{ field.name }}: {{ error }}</li>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            <li>{{ form.non_field_errors }}</li>
+        </ul>  
+
     </div>
-
-    <button type="submit" class="btn btn-dark mb-3">Save Changes</button>
-
-    <button type="reset" class="btn btn-outline-dark mb-3 ms-2" style="width: 50px;"><i class="fas fa-sync-alt"></i></button>
-
-    <ul class='errorList'>
-        {% for field in form %}
-            {% if field.errors %}
-                {% for error in field.errors %}
-                    <li style="color: red;">{{ field.name }}: {{ error }}</li>
-                {% endfor %}
-            {% endif %}
-        {% endfor %}
-    </ul>  
-
-    <li style="color: red;">{{ form.non_field_errors }}</li>
-
     </form> 
-
 <script>
     var formActionLinks = document.getElementsByClassName('form-action-link');
     for (var i = 0; i < formActionLinks.length; i++) {

@@ -1,9 +1,94 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% include 'includes/admin_navbar.html' %}  
-    
-    <h4>Welcome {{ user.first_name }}</h4>
-    <p>Admin's Dashboard</p>
-    
+  <!-- Sidebar -->
+  {% include 'includes/admin_navbar.html' %}
+
+  <!-- Main Content Area -->
+  <div class="content">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1>Admin Dashboard</h1>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row">
+      <div class="col-md-3">
+        <div class="card quick-stats">
+          <div class="card-body">
+            <i class="fas fa-users"></i>
+            <h3>Total Conferences</h3>
+            <p>{{ total_conferences }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card quick-stats">
+          <div class="card-body">
+            <i class="fas fa-file-alt"></i>
+            <h3>Total Papers</h3>
+            <p>{{ total_papers }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card quick-stats">
+          <div class="card-body">
+            <i class="fas fa-users"></i>
+            <h3>Total Users</h3>
+            <p>{{ total_users }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card quick-stats">
+          <div class="card-body">
+            <i class="fas fa-calendar"></i>
+            <h3>Upcoming Conferences</h3>
+            <p>{{ upcoming_conferences }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manage Conferences Table -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title">Manage Conferences</h4>
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for conference in conferences %}
+                    <tr>
+                      <td>{{ conference.id }}</td>
+                      <td>{{ conference.name }}</td>
+                      <td>{{ conference.start_date }}</td>
+                      <td>{{ conference.end_date }}</td>
+                      <td>{{ conference.status }}</td>
+                      <td>
+                        <a href="{% url 'edit_conference' conference.id %}" class="btn btn-sm btn-primary">Edit</a>
+                        <a href="{% url 'delete_conference' conference.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this conference?')">Delete</a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}

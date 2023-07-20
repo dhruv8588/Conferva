@@ -1,133 +1,188 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    /* styles.css */
 
+/* Style for the main content area */
+.container {
+    padding: 20px;
+}
+
+/* Center the main content */
+.center-content {
+    text-align: center;
+}
+
+/* Style for the tables */
+.table {
+    margin-top: 20px;
+}
+
+/* Style for table rows on hover */
+.table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Style for action links in the table */
+.table a {
+    text-decoration: none;
+}
+
+/* Style for the header */
+h4 {
+    margin: 0;
+    padding: 10px 0;
+}
+
+h3 {
+    margin-top: 20px;
+}
+
+/* Style for the paragraph */
+p {
+    margin: 0;
+    font-weight: bold;
+}
+
+/* Style for the search input */
+#search {
+    width: 300px;
+}
+
+/* Style for pagination */
+.pagination {
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination li {
+    display: inline-block;
+    margin: 2px;
+}
+
+.pagination a,
+.pagination span {
+    padding: 8px 12px;
+    text-decoration: none;
+    color: #007bff;
+    border: 1px solid #007bff;
+}
+
+.pagination .active span {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Style for the "No Data" message */
+#no-data {
+    width: 100%;
+    text-align: center;
+    font-size: 25px;
+    color: red;
+    display: none;
+}
+
+</style>
     {% include 'includes/author_navbar.html' %}
 
-    <div class="input-group input-group-sm mb-3 mt-2">
-        <input type="text" onkeyup="searchFunction()" class="form-control" id="search" placeholder="Search for...">
-        <a href="{% url 'conference_listing' %}" class="btn btn-dark"><i class="fas fa-sync-alt"></i></a>
-        {% comment %} <button type="reset" class="btn btn-outline-dark mb-3 ms-2" style="width: 50px;"><i class="fas fa-sync-alt"></i></button> {% endcomment %}
-    <table class="table" id="myTable">
-        <thead>
-        <tr id="chk-th">
-            <th scope="col">#</th>
-            <th scope="col">Name</th>
-            <th scope="col">Acronym</th>
-            <th scope="col">Research area</th>
-            <th scope="col">Where</th>
-            <th scope="col">Start date</th>
-            <th scope="col">End date</th>
-            <th scope="col">Submission Deadline</th>
-            <th scope="col">Link to submit</th>    
-        </tr>
-        </thead>
-        <tbody>
-            {% for conference in page_obj %}
-                <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
-                    <td>{{ conference.name }}</td>
-                    <td>{{ conference.acronym }}</td>
-                    <td>{{ conference.research_area }}</td>
-                    <td>{{ conference.venue }}, {{ conference.city }}, {{ conference.country }}</td>
-                    <td>{{ conference.start_date }}</td>
-                    <td>{{ conference.end_date }}</td>
-                    <td>{{ conference.submission_deadline }}</td>
-                    <td>
-                        {% if conference.submission_deadline >= today  %}
-                            <a href="{% url 'submit_paper' conference.id %}">Submit</a>
-                        {% endif %}    
-                    </td>
+    <div class="container">
+        <div class="center-content">
+            <h4>Welcome {{ user.first_name }}</h4>
+            <p>{{ user.role }}'s Dashboard</p>
+        </div>
+
+        <div class="input-group input-group-sm mb-3 mt-2">
+            <input type="text" onkeyup="searchFunction()" class="form-control" id="search" placeholder="Search for...">
+            <div class="input-group-append">
+                <a href="{% url 'conference_listing' %}" class="btn btn-dark"><i class="fas fa-sync-alt"></i></a>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover" id="myTable">
+                <thead class="thead-light">
+                <tr id="chk-th">
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Acronym</th>
+                    <th scope="col">Research area</th>
+                    <th scope="col">Where</th>
+                    <th scope="col">Start date</th>
+                    <th scope="col">End date</th>
+                    <th scope="col">Submission Deadline</th>
+                    <th scope="col">Link to submit</th>
                 </tr>
-            {% endfor %}    
-        </tbody>
-    </table>
+                </thead>
+                <tbody>
+                {% for conference in page_obj %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ conference.name }}</td>
+                        <td>{{ conference.acronym }}</td>
+                        <td>{{ conference.research_area }}</td>
+                        <td>{{ conference.venue }}, {{ conference.city }}, {{ conference.country }}</td>
+                        <td>{{ conference.start_date }}</td>
+                        <td>{{ conference.end_date }}</td>
+                        <td>{{ conference.submission_deadline }}</td>
+                        <td>
+                            {% if conference.submission_deadline >= today  %}
+                                <a href="{% url 'submit_paper' conference.id %}" class="btn btn-primary">Submit</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    {% comment %} <br/><br/>
-    {{ page_obj }}<br/>
-    has next: {{ page_obj.has_next }}<br/>
-    has previous: {{ page_obj.has_previous }}<br/>
-    current page: {{ page_obj.number }}<br/>
-    no. of pages: {{ page_obj.paginator.num_pages }}<br/>
+        <nav class="mt-4">
+            {% if page_obj.has_other_pages %}
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a href="?page=1" class="btn btn-outline-secondary">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"></li>
+                    {% endif %}
 
-    <br/><hr/><br/> {% endcomment %}
+                    {% for i in page_obj.paginator.page_range %}
+                        {% if page_obj.number == i %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ i }}<span class="sr-only">(current)</span></span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
 
-    {% comment %} <nav aria-label="Page navigation example">
-        <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=1">&laquo First</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                </li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-secondary">Last</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"></li>
+                    {% endif %}
+                </ul>
             {% endif %}
+        </nav>
 
-            <li class="page-item disabled">
-                <a href="#" class="page-link">
-                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                </a>    
-            </li>
+        <span class="text-danger" id="no-data">Conference not found</span>
+    </div>
 
-            {% for page in page_obj.paginator.page_range %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page }}">
-                        {{ page }}
-                    </a>
-                </li>
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                </li>
-                <li class="page-item">    
-                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo</a>
-                </li>
-            {% endif %}        
-        </ul>
-    </nav>  {% endcomment %}
-
-    <nav class="mt-4">
-        {% if page_obj.has_other_pages %}
-        <ul class="pagination">
-            {% if page_obj.has_previous %}
-                <a href="?page=1" class="btn btn-outline-secondary mb-4">First</a>
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}"><i class="fas fa-angle-double-left"></i></a></li>
-            {% else %}
-                <li class="page-item disabled"></li>    
-            {% endif %}
-    
-            {% if pages_obj.number|add:'-2' > 1 %}
-                <li><a class='page-link' href="?page={{ page_obj.number|add:'-2' }}">&hellip;</a></li>
-            {% endif %}
-    
-            {% for i in page_obj.paginator.page_range %}
-                {% if page_obj.number == i %}
-                    <li class="page-item active"><span class="page-link">{{ i }}<span class="sr-only"></span></span></li>
-                {% elif i > page_obj.number|add:'-2' and i < page_obj.number|add:'2' %}
-                    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
-                {% endif %}
-            {% endfor %}
-            
-            {% if page_obj.paginator.num_pages > page_obj.number|add:'2' %}
-                <li><a class="page-link" href="?page={{ page_obj.number|add:'-2' }}">&hellip;</a></li>
-                <li><a href="?page={{ i }}">{{ i }}</a></li>
-                <li><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a></li>
-            {% endif %}
-        
-            {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="fas fa-angle-double-right"></i></a></li>
-                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-secondary mb-4">Last</a>
-            {% else %}
-                <li class="page-item disabled"></li>        
-            {% endif %}
-        </ul>
-        {% endif %}
-    </nav>
-
-    <span class="text-danger" id="no-data"></span>
- 
     <script>
         function searchFunction() {
             let input, filter, table, tr, td, j;
@@ -135,45 +190,31 @@
             filter = input.value.toUpperCase();
             table = document.getElementById("myTable");
             tr = table.getElementsByTagName("tr");
+            let noDataMessage = document.getElementById("no-data");
 
-            for (j=0; j<tr.length; j++) {
+            let noResults = true;
+            for (j = 0; j < tr.length; j++) {
                 td = tr[j].getElementsByTagName("td");
-                msg = document.getElementById("no-data");
-
+                tr[j].style.display = "none";
                 if (td.length > 0) {
-                    if (td[0].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
-                    td[1].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
-                    td[2].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
-                    td[3].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
-                    td[4].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
-                    td[5].innerHTML.toLocaleUpperCase().indexOf(filter) > -1 ||
-                    td[6].innerHTML.toLocaleUpperCase().indexOf(filter) > -1) {
+                    if (td[0].innerHTML.toUpperCase().indexOf(filter) > -1 ||
+                        td[1].innerHTML.toUpperCase().indexOf(filter) > -1 ||
+                        td[2].innerHTML.toUpperCase().indexOf(filter) > -1 ||
+                        td[3].innerHTML.toUpperCase().indexOf(filter) > -1 ||
+                        td[4].innerHTML.toUpperCase().indexOf(filter) > -1 ||
+                        td[5].innerHTML.toUpperCase().indexOf(filter) > -1 ||
+                        td[6].innerHTML.toUpperCase().indexOf(filter) > -1) {
                         tr[j].style.display = "";
-                        msg.innerHTML = "";
+                        noDataMessage.style.display = "none";
+                        noResults = false;
                     }
-                    else {
-                        tr[j].style.display = "none";
-                    }
-                }
-                if (td.length == 0) {
-                    msg.innerHTML = "Conference not found"
                 }
             }
+
+            if (noResults) {
+                noDataMessage.style.display = "block";
+            }
         }
-    </script>    
+    </script>
 
-    <style>
-        #no-data {
-            width: 80%;
-            position: absolute;
-            top: 150%;
-            left: 50%;
-            margin-right: -50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            font-size: 25px;
-        }
-    </style>    
-
-    {% endblock %}
-
+{% endblock %}

@@ -1,128 +1,275 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<style>
+  /* Additional styles for the form container */
+.form-container {
+  max-width: 800px;
+  margin: 50px auto;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for the form labels */
+.form-group label {
+  font-weight: bold;
+  color: #555;
+}
+
+/* Style for the form inputs and textarea */
+.form-group input[type="text"],
+.form-group textarea,
+.form-group input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Style for the form buttons */
+.form-group input[type="submit"],
+.form-group button[type="reset"] {
+  width: 100%;
+  padding: 12px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.form-group input[type="submit"]:hover,
+.form-group button[type="reset"]:hover {
+  background-color: #555;
+}
+
+/* Style for the error list */
+.errorList {
+  list-style: none;
+  color: red;
+}
+
+/* Style for the "Add Author" and "Add Keywords" links */
+.add-keywords,
+.form-action-link {
+  color: #333;
+  text-decoration: none;
+  margin-left: 10px;
+}
+
+.add-keywords:hover,
+.form-action-link:hover {
+  color: #555;
+}
+
+/* Style for the "Back" and "Reset" buttons in a row */
+.form-group .btn-outline-dark {
+  width: 100%;
+  padding: 12px;
+}
+
+/* Style for the container */
+.content-container {
+  margin-top: 20px;
+}
+
+/* Center the form title */
+.form-container h2.text-center {
+  text-align: center;
+}
+
+/* Style for the "Keywords" section */
+#item-keywords {
+  margin-bottom: 20px;
+}
+
+/* Style for the form rows */
+.form-row {
+  margin-bottom: 20px;
+}
+
+/* Responsive styling for smaller screens */
+@media (max-width: 768px) {
+  .form-group input[type="text"],
+  .form-group textarea,
+  .form-group input[type="file"],
+  .form-group input[type="submit"],
+  .form-group button[type="reset"] {
+    width: 100%;
+  }
+}
+
+/* Style for the "Submit Paper" button */
+.btn-dark.mb-3 {
+  width: 100%;
+  padding: 12px;
+  font-weight: bold;
+}
+
+/* Style for the "Back" and "Reset" buttons in a row */
+.form-group .btn-outline-dark {
+  width: 100%;
+  padding: 12px;
+}
+
+/* Style for the container */
+.content-container {
+  margin-top: 20px;
+}
+
+/* Center the form title */
+.form-container h2.text-center {
+  text-align: center;
+}
+
+
+</style>
 {% include 'includes/author_navbar.html' %}
- 
-  {% if not display_add_author_modal and not display_edit_author_modal %}
-      {% if paper %}  
-        <form id="submit-paper-form" action="{% url 'submit_paper' paper.id conference_id %}" method="post" enctype="multipart/form-data">
-      {% else %}
-        <form action="{% url 'submit_paper' conference_id %}" method="post" enctype="multipart/form-data">
-      {% endif %}   
-  {% endif %}
-
-    {% csrf_token %}
-
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label>Title</label> {{ form.title }}
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label>Abstract</label> {{ form.abstract }}
-        </div>
-    </div>
-    
-    <p>Authors: </p> 
+<div class="container content-container">
+  <div class="form-container">
+    <h2 class="text-center">Submit Paper</h2>
+    {% if not display_add_author_modal and not display_edit_author_modal %}
     {% if paper %}
-      {% if paper.authors %}
-        {% for author in paper.authors.all %}
-          {% if author.email != paper.submitter.email %} 
-            <p> {{ author.first_name }} {{ author.last_name }}
-              <a href="#" class="form-action-link" data-action="edit_author" data-author-id="{{ author.id }}" style="color: unset;"><i class="fas fa-edit"></i></a>
-              <a href="#" class="form-action-link" data-action="delete_author" data-author-id="{{ author.id }}"><i class="fas fa-trash text-danger"></i></a>
-            </p>
-          {% endif %}
-        {% endfor %}
-      {% endif %}
-    {% endif %}
-    
-    <button type="submit" name="add_author" class="btn btn-dark">Add Author</button>
-
-    <div class="form-row">
-      <div class="form-group col-md-6">
-          <label>Add yourself as author</label> {{ form.is_submitter_author }}
-      </div>
-   </div>
-
-   <div class="form-row">
-    <div class="form-group col-md-6" id="item-keywords">
-      <label>Keywords</label>&nbsp; &nbsp;<a href="#" class="add-keywords"><i class="fas fa-plus"></i></a>
-      <br />
-      {{ formset.management_form }} 
-      {% for form in formset %}
-      <tr>
-        {% for field in form.visible_fields %} 
-          {% if field.name != 'DELETE' %}
-            <td>
-              {{ field }}
-              {% for error in field.errors %}
-                <span style="color: red">{{ error }}</span>
-              {% endfor %}
-            </td>
-          {% endif %} 
-        {% endfor %} 
-        {% if form.instance.pk %}
-          <input type="hidden" name="{{ formset.prefix }}-{{ forloop.counter0 }}-id" value="{{ form.instance.pk }}"/>
+    <form id="submit-paper-form" action="{% url 'submit_paper' paper.id conference_id %}" method="post"
+      enctype="multipart/form-data">
+      {% else %}
+      <form action="{% url 'submit_paper' conference_id %}" method="post" enctype="multipart/form-data">
         {% endif %}
-      </tr>
-      <br/>
-      {% endfor %}
+        {% endif %}
+
+        {% csrf_token %}
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Title</label>
+              {{ form.title }}
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label>Abstract</label>
+              {{ form.abstract }}
+            </div>
+          </div>
+        </div>
+
+        <p>Authors:</p>
+        {% if paper %}
+        {% if paper.authors %}
+        {% for author in paper.authors.all %}
+        {% if author.email != paper.submitter.email %}
+        <div class="form-group">
+          <p>{{ author.first_name }} {{ author.last_name }}
+            <a href="#" class="form-action-link" data-action="edit_author" data-author-id="{{ author.id }}"><i
+                class="fas fa-edit"></i></a>
+            <a href="#" class="form-action-link" data-action="delete_author" data-author-id="{{ author.id }}"><i
+                class="fas fa-trash text-danger"></i></a>
+          </p>
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+        {% endif %}
+
+        <button type="submit" name="add_author" class="btn btn-dark">Add Author</button>
+
+        <div class="row mt-3">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Add yourself as author</label>
+              {{ form.is_submitter_author }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" id="item-keywords">
+          <label>Keywords</label>&nbsp;&nbsp;<a href="#" class="add-keywords"><i class="fas fa-plus"></i></a>
+          <br>
+          {{ formset.management_form }}
+          {% for form in formset %}
+          <div class="row">
+            {% for field in form.visible_fields %}
+            {% if field.name != 'DELETE' %}
+            <div class="col-md-6">
+              <div class="form-group">
+                {{ field }}
+                {% for error in field.errors %}
+                <span style="color: red">{{ error }}</span>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+          </div>
+          {% if form.instance.pk %}
+          <input type="hidden" name="{{ formset.prefix }}-{{ forloop.counter0 }}-id" value="{{ form.instance.pk }}" />
+          {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>File</label>
+              {{ form.file }}
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" name="submit_paper" class="btn btn-dark mb-3">Submit Paper</button>
+
+        <div class="row">
+          <div class="col-md-6">
+            <a href="{% url 'conference_listing' %}" class="btn btn-outline-dark"><i class="fas fa-chevron-left"></i> Back</a>
+          </div>
+          <div class="col-md-6">
+            <button type="reset" class="btn btn-outline-dark float-md-right"><i class="fas fa-sync-alt"></i> Reset</button>
+          </div>
+        </div>
+
+        <ul class='errorList mt-3'>
+          {% for field in form %}
+          {% if field.errors %}
+          {% for error in field.errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+          {% endif %}
+          {% endfor %}
+          <li>{{ form.non_field_errors }}</li>
+        </ul>
+
+      </form>
     </div>
   </div>
+</div>
 
-
-
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label>File</label>
-            {{ form.file }}
-        </div>
-    </div>
-  
-    <button type="submit" name="submit_paper" class="btn btn-dark mb-3">Submit Paper</button>
-     
-    <a href="{% url 'conference_listing' %}" class="btn btn-outline-dark mb-3 ms-2" style="width: 75px;"><i class="fas fa-chevron-left"></i> Back</a>
-
-    <button type="reset" class="btn btn-outline-dark mb-3 ms-2" style="width: 50px;"><i class="fas fa-sync-alt"></i></button>
-    
-    <ul class='errorList'>
-        {% for field in form %}
-          {% if field.errors %}
-            {% for error in field.errors %}
-              <li style="color: red;">{{ error }}</li>
-            {% endfor %}
-          {% endif %}
-        {% endfor %}
-    </ul>
-    
-    <li style="color: red;">{{ form.non_field_errors }}</li>
-</form>
-
-<script
-  src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-  integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-  crossorigin="anonymous"
-></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+  integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 
 <script>
   var formActionLinks = document.getElementsByClassName('form-action-link');
   for (var i = 0; i < formActionLinks.length; i++) {
-    formActionLinks[i].addEventListener('click', function(e) {
+    formActionLinks[i].addEventListener('click', function (e) {
       e.preventDefault();
       var form = document.getElementById('submit-paper-form');
       var authorId = this.getAttribute('data-author-id');
       var action = this.getAttribute('data-action');
       var confirmMessage = "Are you sure you want to delete this author?";
 
-      if (action=='delete_author'){
+      if (action == 'delete_author') {
         if (confirm(confirmMessage)) {
           form.action = form.action + 'author/' + authorId + '/' + '?action=' + action;
           form.submit();
         }
       }
-      else{
+      else {
         form.action = form.action + 'author/' + authorId + '/' + '?action=' + action;
         form.submit();
       }
