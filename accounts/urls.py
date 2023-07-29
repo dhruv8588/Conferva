@@ -22,6 +22,9 @@ urlpatterns = [
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),
 
     path('forgot_password/', views.forgot_password, name='forgot_password'),
+    # path('author/forgot_password/', views.forgot_password, name='forgot_password_author'),
+    # path('admin/forgot_password/', views.forgot_password, name='forgot_password_admin'),
+
     path('reset_password/', views.reset_password, name='reset_password'),
 
     path('conference/', include('conference.urls')),

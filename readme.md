@@ -63,6 +63,10 @@ To run the project locally, follow these steps:
 13. Start the development server:
  `python manage.py runserver`
 
+14. To access the admin portal, open a different web browser or the same browser in private mode and type in the url: `localhost:8000/admin` in the web browser search bar.  
+  Log in by using the username and password you set while creating the superuser.
+  After being logged in, in the Accounts section go to the User model and create a new User object by setting a unique username and a password and then mark the 'is_admin' True. 
+
 ## Additional Commands
 
 - To stop the development server press Ctrl+C

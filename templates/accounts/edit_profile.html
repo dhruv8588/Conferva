@@ -31,7 +31,6 @@
         <div class="form-group col-md-6" id="item-research_areas">
           <label>Research Areas</label>
           <a href="#" class="add-research_areas"><i class="fas fa-plus"></i></a>
-          <br />
           {{ formset.management_form }}
           {% for rform in formset %}
             {{ rform.management_form }}
@@ -39,7 +38,7 @@
               {% for field in rform.visible_fields %}
                 {% if field.name != 'DELETE' %}
                   <div class="form-group col-md-6">
-                    {{ field|add_class:'form-control' }}
+                    {{ field }}
                     {% for error in field.errors %}
                       <span style="color: red">{{ error }}</span>
                     {% endfor %}
@@ -75,7 +74,6 @@
                 </div>            
               {% endif %}
             </div>
-            <br />
           {% endfor %}
         </div>
       </div>

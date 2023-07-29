@@ -161,6 +161,8 @@
 
         <button type="submit" class="btn btn-dark mb-3">Save Changes</button>
 
+        <a href="{% url 'myAccount' %}" class="btn btn-outline-dark mb-3 ms-2" style="width: 100px;"><i class="fas fa-chevron-left"></i> Back</a>
+
         <button type="reset" class="btn btn-outline-dark mb-3 ms-2" style="width: 50px;"><i class="fas fa-sync-alt"></i></button>
 
         <ul class='errorList'>
@@ -171,7 +173,10 @@
                     {% endfor %}
                 {% endif %}
             {% endfor %}
-            <li>{{ form.non_field_errors }}</li>
+
+            {% if form.non_field_errors %}
+                <li style="color: red;">{{ form.non_field_errors }}</li>
+            {% endif %}
         </ul>  
 
     </div>

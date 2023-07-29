@@ -180,10 +180,10 @@
                           <div class="col-lg-12 login-btm login-button">
                             <div class="d-flex justify-content-between">
                               <div>
-                                <a href="{% url 'forgot_password' %}" class="text-decoration-none">Forgot password?</a>
+                                <a href="{% url 'forgot_password' %}?role=Editor" class="text-decoration-none">Forgot password?</a>
                               </div>
                               <div>
-                                <a href="{% url 'registerEditor' %}" class="text-decoration-none">Register to be an Editor</a>
+                                <a href="{% url 'registerEditor' %}?role=editor" class="text-decoration-none">Register to be an Editor</a>
                               </div>
                             </div>
                           </div>

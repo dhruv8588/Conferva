@@ -33,6 +33,7 @@
         <form action="{% url 'review' paper.id %}" method="post">
             {% csrf_token %}
             {{ form.body }}
+            <br/>
             <a href="{% url 'myAccount' %}" class="btn btn-outline-secondary mb-3"><i class="fas fa-angle-left"></i> Back</a>
             <button type="submit" class="btn btn-dark mb-3">Submit</button>
             {% if review %}

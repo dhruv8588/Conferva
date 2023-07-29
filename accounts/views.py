@@ -1,5 +1,6 @@
 from django import forms
 from django.http import HttpResponseRedirect
+from django.urls import resolve
 from django.utils.http import urlsafe_base64_decode
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages, auth
@@ -36,7 +37,7 @@ def check_role_editor(user):
         raise PermissionDenied 
 
 def registerAuthor(request):
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and request.user.role == 'Author':
         messages.warning(request, 'You are already logged in!')
         return redirect('myAccount')
     elif request.method=='POST':
@@ -92,7 +93,7 @@ def registerAuthor(request):
     return render(request, 'accounts/registerAuthor.html', context)
 
 def registerEditor(request):
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and request.user.role == 'Editor':
         messages.warning(request, 'You are already logged in!')
         return redirect('myAccount')
     elif request.method=='POST':
@@ -366,13 +367,23 @@ def editorDashboard(request):
 def adminDashboard(request):
     return render(request, 'accounts/adminDashboard.html')
 
-def forgot_password(request):
+def forgot_password(request): 
+    role = request.GET['role'] # role = request.GET.get('role')
     if request.method=='POST':
-        email = request.POST['email']
+        email = request.POST['email']              
 
-        if User.objects.filter(email=email).exists():
-            user = User.objects.get(email__exact=email)
+        try:
+            if role=='Admin':
+                user = User.objects.get(email=email, is_admin=True)
+            else:    
+                user = User.objects.get(email=email, role=role)
+        except User.DoesNotExist:
+            user = None
 
+        # In this version, we use the filter() method instead of get(), and then we use the first() method to retrieve
+        # the first matching object. If no matching object is found, first() returns None, which is exactly what we want as the default value for user.    
+        #     user = User.objects.filter(email=email, role=role).first()    
+        if user:
             # send reset password email
             mail_subject = 'Your new Password'
             email_template = 'accounts/emails/reset_password.html'
@@ -384,13 +395,16 @@ def forgot_password(request):
             messages.success(request, 'A new Password has been sent to your email address.')
             if user.role == 'Editor':
                 return redirect('loginEditor')
+            elif user.role == 'Author':
+                return redirect('loginAuthor')  
             else:
-                return  redirect('loginAuthor')  
+                return redirect('loginAdmin')
         else:
             messages.error(request, 'Account does not exist')
-            return redirect('forgot_password')
-        
-    return render(request, 'accounts/forgot_password.html')
+    context = {
+        'role': role
+    }    
+    return render(request, 'accounts/forgot_password.html', context)
 
 def reset_password(request):
     if request.method=='POST':
@@ -404,8 +418,10 @@ def reset_password(request):
             messages.success(request, 'Password changed sucessfully!')
             if user.role == 'Editor':
                 return redirect('loginEditor')
-            else:
+            elif user.role == 'Author':
                 return  redirect('loginAuthor')  
+            else:
+                return  redirect('loginAdmin')  
         else:
             messages.error(request, 'Password do not match!')
             return redirect('reset_password')
