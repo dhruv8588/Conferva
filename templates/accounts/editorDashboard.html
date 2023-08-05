@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+  /* Additional CSS for the editor dashboard page */
+
+/* Style for the main content area */
+.container {
+    padding: 20px;
+}
+
+/* Center the main content */
+.center-content {
+    text-align: center;
+}
+
+/* Style for the tables */
+.table {
+    margin-top: 20px;
+}
+
+/* Style for table rows on hover */
+.table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Style for action links in the table */
+.table a {
+    text-decoration: none;
+}
+
+/* Style for the header */
+h4 {
+    margin: 0;
+    padding: 10px 0;
+}
+
+h3 {
+    margin-top: 20px;
+}
+
+/* Style for the paragraph */
+p {
+    margin: 0;
+    font-weight: bold;
+}
+
+/* Style for the search input */
+#search {
+    width: 300px;
+}
+
+/* Style for pagination */
+.pagination {
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination li {
+    display: inline-block;
+    margin: 2px;
+}
+
+.pagination a,
+.pagination span {
+    padding: 8px 12px;
+    text-decoration: none;
+    color: #007bff;
+    border: 1px solid #007bff;
+}
+
+.pagination .active span {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Style for the "No Data" message */
+#no-data {
+    width: 100%;
+    text-align: center;
+    font-size: 25px;
+    color: red;
+    display: none;
+}
+</style>
+    {% include 'includes/editor_navbar.html' %} 
+
+    <div class="container mt-4 text-center">
+        <h4>Welcome, {{ user.first_name }}</h4>
+        <p>{{ user.role }}'s Dashboard</p>
+
+        {% if conferences %}
+            <h3>Conferences:</h3>
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Research Area</th>
+                        <th scope="col">Where</th>
+                        <th scope="col">Start Date</th>
+                        <th scope="col">End Date</th>
+                        <th scope="col">Submission Deadline</th>
+                        <th scope="col">Editors</th>
+                        <th scope="col">Approval Status</th>
+                        <th scope="col">Action</th>
+                        <th scope="col">View Papers Submitted</th>      
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for conference in conferences %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td>{{ conference.name }} ({{ conference.acronym }})</td>
+                            <td>{{ conference.research_area }}</td>
+                            <td>{{ conference.venue }}, {{ conference.city }}, {{ conference.country }}</td>
+                            <td>{{ conference.start_date }}</td>
+                            <td>{{ conference.end_date }}</td>
+                            <td>{{ conference.submission_deadline }}</td>
+                            <td>
+                                {% for editor in conference.editors.all %}
+                                    {{ editor.first_name }} {{ editor.last_name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %} 
+                            </td> 
+                            <td>
+                                {% if conference.is_approved %}
+                                    Approved
+                                {% elif not conference.is_approved %}
+                                    Not Approved  
+                                {% else %}
+                                    Not Decided 
+                                {% endif %}  
+                            </td>
+                            <td>
+                                <a href="{% url 'edit_conference' conference.id %}" style="color: unset;"><i class="fas fa-edit"></i></a>
+                                &nbsp;
+                                <a href="{% url 'delete_conference' conference.id %}" onclick="return confirm('Are you sure you want to delete this conference?')"><i class="fa fa-trash text-danger"></i></a>
+                            </td>
+                            <td>
+                                {% for editor in conference.editors.all %}
+                                    {% if editor.user == user and conference.is_approved %}
+                                        <a href="{% url 'view_papers' conference.id %}" class="btn btn-primary">View</a>
+                                    {% endif %}
+                                {% endfor %}    
+                            </td>  
+                        </tr>
+                    {% endfor %}    
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+
+{% endblock %}

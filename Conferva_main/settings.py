@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
     'accounts.apps.AccountsConfig',
     'conference',
+    'paper',
 ]
 
 RISPY_TEMPLATE_PACK = 'bootstrap4'

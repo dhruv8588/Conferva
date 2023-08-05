@@ -10,10 +10,12 @@ def detectUser(user):
     redirectUrl = ''
     if user.is_superadmin:
         redirectUrl = '/admin'
-    if user.is_admin == True:
+    elif user.is_admin:
         redirectUrl = 'adminDashboard'
+    elif user.role == 'Editor':
+        redirectUrl = 'editorDashboard'
     else:
-        redirectUrl = 'guestDashboard'
+        redirectUrl = 'authorDashboard'    
     return redirectUrl
 
 

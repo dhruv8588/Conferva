@@ -1,5 +1,0 @@
-{% extends 'conference/add_author.html' %}
-
-{% block action %} action="{% url 'edit_paper_add_author' conference_id paper.id %}" {% endblock action %}
-
-{% block redirect-link %}"{% url 'edit_paper' conference_id paper.id %}"{% endblock %}

@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    
+}
+
+.content-container {
+    max-width: 800px;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.textarea {
+    resize: vertical;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+   
+}
+
+.form-group input[type="file"] {
+    display: block;
+}
+
+.form-group input[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form-group input[type="submit"]:hover {
+    background-color: #555;
+}
+
+</style>
+  {% include 'includes/author_navbar.html' %}
+
+  {% if not display_add_author_modal and not display_edit_author_modal %}
+      {% if paper %}  
+        <form id="submit-paper-form" action="{% url 'submit_paper' paper.id conference_id %}" method="post" enctype="multipart/form-data">
+      {% else %}
+        <form action="{% url 'submit_paper' conference_id %}" method="post" enctype="multipart/form-data">
+      {% endif %}   
+  {% endif %}
+  
+<!-- Modal -->
+<div class="modal fade" {% block modal-id %} id="add_author_modal" {% endblock modal-id %} tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{% block modal-title %}<i class="fas fa-plus"></i>&nbsp;&nbsp;Add Author</h5>{% endblock modal-title %}
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="redirectToSubmitPaper()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+        <form {% block action %} action="{% url 'add_author' paper.id conference_id %}" {% endblock action %} method="post">
+          {% csrf_token %}
+          <div class="modal-body">
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label>First name</label> {{ aform.first_name }}
+              </div>
+              <div class="form-group col-md-6">
+                <label>Last name</label> {{ aform.last_name }}
+              </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label>Email</label> {{ aform.email }}
+                </div>
+            </div>
+            <div class="mt-4" style="width: 100%;"> 
+              <button type="submit" class="btn btn-secondary mb-3">
+                {% block btn-action %}<i class="fas fa-plus"></i>&nbsp;&nbsp;Add Author{% endblock btn-action %}
+              </button>
+              <button type="reset" class="btn btn-outline-dark mb-3 ms-2" style="width: 50px;"><i class="fas fa-sync-alt"></i></button>
+            </div>
+            <ul class='errorList'>
+              {% for field in aform %}
+                  {% if field.errors %}
+                      {% for error in field.errors %}
+                          <li style="color: red;">{{ error }}</li>
+                      {% endfor %}
+                  {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+      </form>      
+    </div>
+  </div>
+</div>
+{% comment %} Modal end {% endcomment %}
+
+<div class="container content-container">
+  <div class="form-container">
+    <h2 class="text-center">Submit Paper</h2>
+    {% if not display_add_author_modal and not display_edit_author_modal %}
+    {% if paper %}
+    <form id="submit-paper-form" action="{% url 'submit_paper' paper.id conference_id %}" method="post"
+      enctype="multipart/form-data">
+      {% else %}
+      <form action="{% url 'submit_paper' conference_id %}" method="post" enctype="multipart/form-data">
+        {% endif %}
+        {% endif %}
+
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label>Title</label>
+          {{ form.title }}
+        </div>
+
+        <div class="form-group">
+          <label>Abstract</label>
+          {{ form.abstract }}
+        </div>
+
+        <p>Authors:</p>
+        {% if paper %}
+        {% if paper.authors %}
+        {% for author in paper.authors.all %}
+        {% if author.email != paper.submitter.email %}
+        <div class="form-group">
+          <p>{{ author.first_name }} {{ author.last_name }}
+            <a href="#" class="form-action-link" data-action="edit_author" data-author-id="{{ author.id }}"><i
+                class="fas fa-edit"></i></a>
+            <a href="#" class="form-action-link" data-action="delete_author" data-author-id="{{ author.id }}"><i
+                class="fas fa-trash text-danger"></i></a>
+          </p>
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+        {% endif %}
+
+        <button type="submit" name="add_author" class="btn btn-dark">Add Author</button>
+
+        <div class="form-group">
+          <label>Add yourself as author</label>
+          {{ form.is_submitter_author }}
+        </div>
+
+        <div class="form-group" id="item-keywords">
+          <label>Keywords</label>&nbsp;&nbsp;<a href="#" class="add-keywords"><i class="fas fa-plus"></i></a>
+          <br>
+          {{ formset.management_form }}
+          {% for form in formset %}
+          <div class="form-row">
+            {% for field in form.visible_fields %}
+            {% if field.name != 'DELETE' %}
+            <div class="form-group col-md-6">
+              {{ field }}
+              {% for error in field.errors %}
+              <span style="color: red">{{ error }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+            {% endfor %}
+          </div>
+          {% if form.instance.pk %}
+          <input type="hidden" name="{{ formset.prefix }}-{{ forloop.counter0 }}-id" value="{{ form.instance.pk }}" />
+          {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label>File</label>
+          {{ form.file }}
+        </div>
+
+        <button type="submit" name="submit_paper" class="btn btn-dark mb-3">Submit Paper</button>
+
+        <a href="{% url 'conference_listing' %}" class="btn btn-outline-dark mb-3 ms-2"><i
+            class="fas fa-chevron-left"></i> Back</a>
+
+        <button type="reset" class="btn btn-outline-dark mb-3 ms-2"><i class="fas fa-sync-alt"></i></button>
+
+        <ul class='errorList'>
+          {% for field in form %}
+          {% if field.errors %}
+          {% for error in field.errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+          {% endif %}
+          {% endfor %}
+          <li>{{ form.non_field_errors }}</li>
+        </ul>
+
+      </form>
+    </div>
+  </div>
+
+
+
+{% block js %}
+<script>
+  $(document).ready(function() {
+    $('#add_author_modal').modal('show');
+    $('#add_author_modal').on('click', function(event) {
+      if ($(event.target).is('#add_author_modal')) {
+        redirectToSubmitPaper();
+      }
+    });
+  }); 
+  {% endblock %}
+  function redirectToSubmitPaper() {
+    window.location.href ="{% url 'submit_paper' paper.id conference_id %}";
+  }
+</script>
+
+
+
+{% endblock %}

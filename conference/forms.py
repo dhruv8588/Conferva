@@ -1,13 +1,12 @@
-from datetime import date
 from django import forms
 from django.contrib.admin.widgets import AdminDateWidget
 from django.forms import modelformset_factory
 
 from accounts.models import User
+from conference.models import Conference, Editor
+from paper.models import Reviewer
 
 from .validators import allow_only_pdf_or_docx_validator
-
-from .models import Author, Conference, Editor, Keywords, Paper, Review, Reviewer
 
 
 class ConferenceForm(forms.ModelForm):
@@ -43,15 +42,6 @@ class ConferenceForm(forms.ModelForm):
         # if submission_deadline < today:
         #     raise forms.ValidationError("Invalid submission deadline. It should be today's date or later.")
 
-
-class PaperForm(forms.ModelForm):
-    # file = forms.FileField(widget=forms.FileInput(attrs={'class': 'btn btn-info'}), required=False) #, validators=[allow_only_pdf_or_docx_validator]
-    is_submitter_author = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
-    class Meta:
-        model = Paper
-        fields = ['title', 'abstract', 'file', 'is_submitter_author'] 
-        
-
 ConferenceModelFormset = modelformset_factory(
     Conference,
     fields = ['is_approved'],
@@ -61,10 +51,10 @@ ConferenceModelFormset = modelformset_factory(
     # },
 )
 
-class AuthorForm(forms.ModelForm):
+class AlternateConferenceForm(forms.ModelForm):
     class Meta:
-        model = Author
-        fields = ['first_name', 'last_name', 'email']
+        model = Conference
+        fields = ['is_approved']
 
 # class ReviewerForm(forms.Form):
 #     email = forms.EmailField()       
@@ -92,18 +82,3 @@ UserModelFormset = modelformset_factory(
     extra = 0,
 )        
 
-class KeywordsForm(forms.ModelForm):
-    class Meta:
-        model = Keywords
-        fields = ['name']
-
-KeywordsFormSet = forms.inlineformset_factory(
-    Paper, Keywords, form=KeywordsForm,
-    extra=1,
-)        
-        
-class ReviewForm(forms.ModelForm):
-    class Meta:
-        model = Review
-        fields = ['body']
-    

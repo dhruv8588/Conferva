@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% block content %}
+
+  {% include 'includes/author_navbar.html' %}
+ 
+  {% if not display_add_author_modal and not display_edit_author_modal %}
+    <form id="edit-paper-form" action="{% url 'edit_paper' paper.id conference_id %}" method="post" enctype="multipart/form-data">
+  {% endif %}
+
+    {% csrf_token %}
+
+    <div class="form-container">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>Title</label> {{ form.title }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>Abstract</label> {{ form.abstract }}
+            </div>
+        </div>
+        
+        <p>Authors: </p> 
+        {% if paper %}
+          {% if paper.authors %}
+            {% for author in paper.authors.all %}
+              {% if author.email != paper.submitter.email %} 
+                <p> {{ author.first_name }} {{ author.last_name }}
+                  <a href="#" class="form-action-link" data-action="edit_paper_edit_author" data-author-id="{{ author.id }}" style="color: unset;"><i class="fas fa-edit"></i></a>
+                  <a href="#" class="form-action-link" data-action="edit_paper_delete_author" data-author-id="{{ author.id }}"><i class="fas fa-trash text-danger"></i></a>
+                </p>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        {% endif %}
+        
+        <button type="submit" name="edit_paper_add_author" class="btn btn-dark">Add Author</button>
+
+        <div class="form-row">
+          <div class="form-group col-md-6">
+              <label>Add yourself as author</label> {{ form.is_submitter_author }}
+          </div>
+       </div>
+
+       <div class="form-row">
+        <div class="form-group col-md-6" id="item-keywords">
+          <label>Keywords</label>&nbsp; &nbsp;<a href="#" class="add-keywords"><i class="fas fa-plus"></i></a>
+          <br />
+          {{ formset.management_form }} 
+          {% for form in formset %}
+          <tr>
+            {% for field in form.visible_fields %} 
+              {% if field.name != 'DELETE' %}
+                <td>
+                  {{ field }}
+                  {% for error in field.errors %}
+                    <span style="color: red">{{ error }}</span>
+                  {% endfor %}
+                </td>
+              {% endif %} 
+            {% endfor %} 
+            {% if form.instance.pk %}
+              <input type="hidden" name="{{ formset.prefix }}-{{ forloop.counter0 }}-id" value="{{ form.instance.pk }}"/>
+            {% endif %}
+          </tr>
+          <br/>
+          {% endfor %}
+        </div>
+      </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>File</label>
+                {{ form.file }}
+            </div>
+        </div>
+      
+        <button type="submit" name="submit_paper" class="btn btn-dark mb-3">Save Changes</button>
+         
+        <a href="{% url 'myAccount' %}" class="btn btn-outline-dark mb-3 ms-2" style="width: 100px;"><i class="fas fa-chevron-left"></i> Back</a>
+
+        <button type="reset" class="btn btn-outline-dark mb-3 ms-2" style="width: 50px;"><i class="fas fa-sync-alt"></i></button>
+        
+        <ul class='errorList'>
+            {% for field in form %}
+              {% if field.errors %}
+                {% for error in field.errors %}
+                  <li>{{field}}: {{ error }}</li>
+                {% endfor %}
+              {% endif %}
+            {% endfor %}
+        </ul>
+        
+        {% if form.non_field_errors %}
+          <li style="color: red;">{{ form.non_field_errors }}</li>
+        {% endif %}
+
+    </div>
+</form>
+
+<script
+  src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+  integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+  crossorigin="anonymous"
+></script>
+
+<script>
+var formActionLinks = document.getElementsByClassName('form-action-link');
+for (var i = 0; i < formActionLinks.length; i++) {
+  formActionLinks[i].addEventListener('click', function(e) {
+    e.preventDefault();
+    var form = document.getElementById('edit-paper-form');
+    var authorId = this.getAttribute('data-author-id');
+    var action = this.getAttribute('data-action');
+    var confirmMessage = "Are you sure you want to delete this author?";
+
+    if (action=='edit_paper_delete_author'){
+      if (confirm(confirmMessage)) {
+        form.action = form.action + 'author/' + authorId + '/' + '?action=' + action;
+        form.submit();
+      }
+    }
+    else{
+      form.action = form.action + 'author/' + authorId + '/' + '?action=' + action;
+      form.submit();
+    }
+  });
+}
+</script>
+<script>
+$(document).ready(function () {
+  $(".add-keywords").click(function (ev) {
+    ev.preventDefault();
+    var formPrefix = "keywords";
+    var tmplMarkup = `
+          <tr>
+              {% for field in formset.empty_form.visible_fields %}
+              {% if field.name != 'DELETE' %}
+                  <td>
+                      {{ field }}
+                      {% for error in field.errors %}
+                          <span style="color: red">{{ error }}</span>
+                      {% endfor %}
+                  </td>
+                  {% endif %}
+              {% endfor %}
+          </tr>
+      `;
+    var tmplMarkupWithValues = tmplMarkup;
+    var formCountInput = $("#id_" + formPrefix + "-TOTAL_FORMS");
+    var formCount = parseInt(formCountInput.val());
+
+    // update form count
+    formCount += 1;
+    formCountInput.val(formCount);
+
+    // add 'required' attribute to dynamically added form fields
+    tmplMarkupWithValues = tmplMarkupWithValues.replace(
+      /__prefix__/g,
+      formCount - 1
+    );
+    tmplMarkupWithValues = tmplMarkupWithValues.replace(
+      /keywords-__prefix__/g,
+      "keywords-" + (formCount - 1)
+    );
+
+    $("#item-keywords").append(tmplMarkupWithValues);
+  });
+});
+
+</script>
+
+<style>
+    /* Add custom styles here */
+    .form-container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 30px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-container h3 {
+        color: #007bff;
+        margin-bottom: 20px;
+    }
+
+    .form-row {
+        margin-bottom: 20px;
+    }
+
+    .form-row label {
+        font-weight: bold;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 4px;
+    }
+
+    .btn-dark {
+        background-color: #343a40;
+        color: #fff;
+    }
+
+    .btn-outline-dark {
+        border: 1px solid #343a40;
+        color: #343a40;
+    }
+
+    .btn-dark:hover,
+    .btn-outline-dark:hover {
+        background-color: #212529;
+        color: #fff;
+    }
+
+    .btn-dark:focus,
+    .btn-outline-dark:focus {
+        box-shadow: 0 0 5px rgba(52, 58, 64, 0.5);
+    }
+
+    .btn-dark:active,
+    .btn-outline-dark:active {
+        background-color: #1d2124;
+        color: #fff;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+
+    .btn-danger:focus {
+        box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+    }
+
+    .form-action-link {
+        margin-left: 10px;
+    }
+
+    .add-keywords {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .add-keywords:hover {
+        color: #0056b3;
+    }
+
+    /* Add more custom styles as needed */
+</style>
+
+{% endblock %}

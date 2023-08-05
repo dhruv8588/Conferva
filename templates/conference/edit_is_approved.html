@@ -1,66 +1,65 @@
 {% extends 'base.html' %}
+
 {% block content %}
 
-<form action="{% url 'edit_is_approved' %}" method="post">
-    {% csrf_token %}
-    {{ formset.management_form }}
+{% include 'includes/admin_navbar.html' %}
 
-    <table class="table">
-        <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Name</th>
-            <th scope="col">Research area</th>
-            <th scope="col">Where</th>
-            <th scope="col">Start date</th>
-            <th scope="col">End date</th>
-            <th scope="col">Submission Deadline</th>
-            <th scope="col">Editors</th>
-            <th scope="col">Is approved</th>    
-        </tr>
-        </thead>
-        <tbody>
-            {% for form in formset %}
-                <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
-                    <input type="hidden" name="{{ form.prefix }}-id" value="{{ form.instance.id }}">
-                    {% comment %} <input type="hidden" name="{{ form.prefix }}-name" value="{{ form.instance.name }}">
-                    <input type="hidden" name="{{ form.prefix }}-acronym" value="{{ form.instance.acronym }}">
-                    <input type="hidden" name="{{ form.prefix }}-research_area" value="{{ form.instance.research_area }}">
-                    <input type="hidden" name="{{ form.prefix }}-venue" value="{{ form.instance.venue }}">
-                    <input type="hidden" name="{{ form.prefix }}-city" value="{{ form.instance.city }}">
-                    <input type="hidden" name="{{ form.prefix }}-country" value="{{ form.instance.country }}">
-                    <input type="hidden" name="{{ form.prefix }}-start_date" value="{{ form.instance.start_date }}">
-                    <input type="hidden" name="{{ form.prefix }}-end_date" value="{{ form.instance.end_date }}">
-                    <input type="hidden" name="{{ form.prefix }}-submission_deadline" value="{{ form.instance.submission_deadline }}"> {% endcomment %}
-        
-                    {% comment %} <td>{{ form.name.value }}({{ form.acronym.value }})</td>
-                    <td>{{ form.research_area.value }}</td>
-                    <td>{{ form.venue.value }}, {{ form.city.value }}, {{ form.country.value }}</td>
-                    <td>{{ form.start_date.value|date:"F d, Y" }}</td>
-                    <td>{{ form.end_date.value|date:"F d, Y" }}</td>
-                    <td>{{ form.submission_deadline.value|date:"F d, Y" }}</td> {% endcomment %}
+<form action="{% url 'edit_is_approved' form.instance.id %}" method="post">
+  {% csrf_token %}
+  <div class="card" style="width: 30rem;">
+    <div class="card-body">
+      <h3 class="card-title">{{ form.instance.name }}({{ form.instance.acronym }})</h3>
 
-                    <td>{{ form.instance.name }}({{ form.instance.acronym }})</td>
-                    <td>{{ form.instance.research_area }}</td>
-                    <td>{{ form.instance.venue }}, {{ form.instance.city }}, {{ form.instance.country }}</td>
-                    <td>{{ form.instance.start_date|date:"F d, Y" }}</td>
-                    <td>{{ form.instance.end_date|date:"F d, Y" }}</td>
-                    <td>{{ form.instance.submission_deadline|date:"F d, Y" }}</td>
-                    <td>
-                        {% for editor in form.instance.editors.all %}
-                            {{ editor }}{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </td>   
-                    <td>
-                        {{ form.is_approved }}
-                    </td>
-                </tr>
-            {% endfor %}    
-        </tbody>
-    </table>
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form> 
+      <p class="card-text">
+        <b>Research Area: </b>{{ form.instance.research_area }}
+      </p>
+      
+      <p class="card-text">
+        <b>Venue: </b>{{ form.instance.venue }}
+      </p>
 
-{% endblock %}
+      <p class="card-text">
+        <b>City: </b>{{ form.instance.city }}
+      </p>
 
+      <p class="card-text">
+        <b>Country: </b>{{ form.instance.country }}
+      </p>
+
+      <p class="card-text">
+        <b>Web page: </b>{{ form.instance.web_page }}
+      </p>
+
+      <p class="card-text">
+        <b>Start date: </b>{{ form.instance.start_date }}
+      </p>
+
+      <p class="card-text">
+        <b>End date: </b>{{ form.instance.end_date }}
+      </p>
+
+      <p class="card-text">
+        <b>Submission deadline: </b>{{ form.instance.submission_deadline }}
+      </p>
+
+      <p class="card-text">
+        <b>Editors: </b>
+        {% for editor in form.instance.editors.all %}
+            {{ editor }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </p>  
+
+      <p class="card-text">
+        <b>Is Approved: </b>{{ form.is_approved }}
+      </p>
+
+      <p>
+        <a href="{% url 'edit_is_approved_all' %}" class="btn btn-outline-secondary mb-3"><i class="fas fa-angle-left"></i> Back</a>
+        <button type="submit" class="btn btn-dark mb-3">Submit</button>
+      </p>   
+
+    </div>
+  </div>
+</form>
+
+{% endblock %}  
