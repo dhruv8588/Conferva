@@ -364,6 +364,46 @@ def delete_review(request, paper_id):
     messages.info(request, 'You have successfully deleted your review of the paper- %s' % review.paper.title)
     return redirect('myAccount')
 
+# def review(request, paper_id):
+#     paper = Paper.objects.get(id=paper_id)
+
+#     paper_reviewer = Paper_Reviewer.objects.get(paper=paper_id, reviewer__user=request.user)
+#     paper_reviewer.status = 'accepted'
+#     paper_reviewer.save()
+
+#     try:
+#         review = Review.objects.get(paper=paper_id, reviewer__user=request.user) 
+#     except:
+#         review = None
+
+#     if request.method == 'POST':
+#         form = ReviewForm(request.POST, instance=review)
+#         review = form.save(commit=False)
+#         review.paper = paper
+#         review.reviewer = paper_reviewer.reviewer
+#         review.save()
+#         messages.info(request, 'You have successfully reviewed the paper- %s' % paper_reviewer.paper.title)
+#         return redirect('myAccount')
+#     else:
+#         form = ReviewForm(instance=review)    
+#     context = {
+#         'form': form,
+#         'paper': paper,
+#         'review': review
+#     }
+#     return render(request, 'paper/review.html', context)
+
+
+    # questions = []
+    # q1 = Question.objects.create(text="What is your age?")
+    # q2 = Question.objects.create(text="What is your favourite fruit?")
+    # questions.append(q1, q2)
+
+    # o1 = Option.objects.create(text="10", question=q1)
+    # o2 = Option.objects.create(text="20", question=q1)
+
+    # o1 = Option.objects.create(text="", question=q2)
+
 def review(request, paper_id):
     paper = Paper.objects.get(id=paper_id)
 
@@ -381,15 +421,24 @@ def review(request, paper_id):
         review = form.save(commit=False)
         review.paper = paper
         review.reviewer = paper_reviewer.reviewer
+        if 'save_draft' in request.POST:
+            review.is_submitted = False 
+        else:
+            review.is_submitted = True       
         review.save()
-        messages.info(request, 'You have successfully reviewed the paper- %s' % paper_reviewer.paper.title)
         return redirect('myAccount')
     else:
-        form = ReviewForm(instance=review)    
+        form = ReviewForm(instance=review)
+
+    # questions = Question.objects.all()    
+    # formset = OptionModelFormset()
+
     context = {
-        'form': form,
+        # 'questions': questions,
         'paper': paper,
+        'form': form,
         'review': review
-    }
+    }    
     return render(request, 'paper/review.html', context)
+
 

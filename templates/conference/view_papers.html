@@ -104,7 +104,9 @@ h3 {
               <th scope="col">Keywords</th>
               <th scope="col">Authors</th>
               <th scope="col">View Paper</th>
-              <th scope="col">Add Reviewers</th>  
+              <th scope="col">Pending Reviewers</th>  
+              <th scope="col">Accepted Reviewers</th> 
+              <th scope="col">Declined Reviewers</th> 
             </tr>
           </thead>
           <tbody>
@@ -133,12 +135,14 @@ h3 {
                     <a href="{% url 'add_reviewer' conference.id paper.id %}" class="btn btn-dark btn-sm"><b>From Users</b> <i class="fas fa-plus"></i></a>
                     <br/>
                     {% for reviewer in paper.reviewers.all %}   
-                      {% if reviewer.user %} 
-                        <span class="reviewer-name" style="color: unset">{{ reviewer.first_name }} {{reviewer.last_name }}</span>
-                        <a href="{% url 'reviewer_info' conference.id paper.id reviewer.id %}" class="text-info"><i class="fas fa-info-circle"></i></a>  
-                        <a href="{% url 'delete_reviewer' conference.id paper.id reviewer.id %}" onclick="return confirm('Are you sure you want to delete this reviewer?')" class="text-danger"><i class="fas fa-trash"></i></a> 
-                        <br>
-                      {% endif %}
+                      {% if reviewer in pending_reviewers %}
+                        {% if reviewer.user %} 
+                          <span class="reviewer-name" style="color: unset">{{ reviewer.first_name }} {{reviewer.last_name }}</span>
+                          <a href="{% url 'reviewer_info' conference.id paper.id reviewer.id %}" class="text-info"><i class="fas fa-info-circle"></i></a>  
+                          <a href="{% url 'delete_reviewer' conference.id paper.id reviewer.id %}" onclick="return confirm('Are you sure you want to delete this reviewer?')" class="text-danger"><i class="fas fa-trash"></i></a> 
+                          <br>
+                        {% endif %}
+                      {% endif %}  
                     {% endfor %}
                   </div>
                   <div class="mt-2">
@@ -154,6 +158,31 @@ h3 {
                     {% endfor %}
                   </div>
                 </td>
+
+                <td>
+                  <div>
+                    {% for reviewer in paper.reviewers.all %}  
+                      {% if reviewer in accepted_reviewers %}
+                        <span class="reviewer-name" style="color: unset">{{ reviewer.first_name }} {{reviewer.last_name }}</span>
+                        <a href="{% url 'reviewer_info' conference.id paper.id reviewer.id %}" class="text-info"><i class="fas fa-info-circle"></i></a>  
+                        <a href="{% url 'delete_reviewer' conference.id paper.id reviewer.id %}" onclick="return confirm('Are you sure you want to delete this reviewer?')" class="text-danger"><i class="fas fa-trash"></i></a> 
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                </td>
+
+                <td>
+                  <div>
+                    {% for reviewer in paper.reviewers.all %}  
+                      {% if reviewer in declined_reviewers %}
+                        <span class="reviewer-name" style="color: unset">{{ reviewer.first_name }} {{reviewer.last_name }}</span>
+                        <a href="{% url 'reviewer_info' conference.id paper.id reviewer.id %}" class="text-info"><i class="fas fa-info-circle"></i></a>  
+                        <a href="{% url 'delete_reviewer' conference.id paper.id reviewer.id %}" onclick="return confirm('Are you sure you want to delete this reviewer?')" class="text-danger"><i class="fas fa-trash"></i></a> 
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                </td>
+
               </tr>
             {% endfor %}    
           </tbody>

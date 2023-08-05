@@ -104,5 +104,39 @@ class Keywords(models.Model):
 class Review(models.Model):
     paper = models.ForeignKey(Paper, related_name="reviews", on_delete=models.CASCADE)
     reviewer = models.ForeignKey(Reviewer, related_name="reviews", on_delete=models.CASCADE)
-    body = models.TextField()
+    # body = models.TextField()
     date_reviewed = models.DateTimeField(auto_now_add=True)
+
+    paper_type = models.CharField(max_length=100, blank=True)
+    has_best_paper_award_potential = models.CharField(max_length=10, blank=True)
+    is_innovative = models.CharField(max_length=10, blank=True)
+    rating = models.PositiveSmallIntegerField(null=True, blank=True)
+    anything_to_be_deleted = models.CharField(max_length=10, blank=True)
+    what_should_be_deleted = models.TextField(blank=True)
+    amt_of_copy_editing = models.CharField(max_length=20, blank=True)
+    interest_to_engineers = models.CharField(max_length=10, blank=True)
+    will_review_revised_version = models.CharField(max_length=10, blank=True)
+    recommendation = models.CharField(max_length=50, blank=True)
+    comments_to_editor = models.TextField(blank=True)
+    comments_to_author = models.TextField(blank=True)
+
+    is_submitted = models.BooleanField(default=False)
+    
+
+
+
+
+# class Question(models.Model):
+#     text = models.TextField()
+
+
+# class Answer(models.Model):
+#     text = models.TextField()
+#     question = models.ForeignKey(Question, related_name="answer", on_delete=models.CASCADE)
+#     review = models.ForeignKey(Review, related_name="answers", on_delete=models.CASCADE)
+
+
+# class Option(models.Model):
+#     text = models.TextField()
+#     question = models.ForeignKey(Question, related_name="options", on_delete=models.CASCADE)
+

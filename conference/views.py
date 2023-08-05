@@ -11,7 +11,7 @@ from django.core.paginator import Paginator
 
 from accounts.models import User
 from conference.models import Conference, Editor
-from paper.models import Paper, Paper_Reviewer, Reviewer
+from paper.models import Paper, Paper_Reviewer, Review, Reviewer
 from conference.utils import send_conference_approval_request_email, send_review_invitation_email
 # from .utils import send_approval_request_email
 
@@ -354,13 +354,32 @@ def view_papers(request, conference_id):
     papers = Paper.objects.filter(conference=conference_id).order_by('created_at')
     conference = Conference.objects.get(id = conference_id)
 
-    paper_reviewers = Paper_Reviewer.objects.filter(paper__in=papers)
+    # paper_reviewers = Paper_Reviewer.objects.filter(paper__in=papers)
+    pending_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='pending')
+    accepted_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='accepted')
+    declined_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='declined')
+    
+    pending_reviewers = []
+    accepted_reviewers = []
+    declined_reviewers = []
+
+    for paper_reviewer_pair in pending_paper_reviewer_pairs:
+        pending_reviewers.append(paper_reviewer_pair.reviewer)
+
+    for paper_reviewer_pair in accepted_paper_reviewer_pairs:
+        accepted_reviewers.append(paper_reviewer_pair.reviewer)
+
+    for paper_reviewer_pair in declined_paper_reviewer_pairs:
+        declined_reviewers.append(paper_reviewer_pair.reviewer)
 
     context = {
         "papers": papers,
         "conference": conference,
-        "paper_reviewers": paper_reviewers
+        "pending_reviewers": pending_reviewers,
+        "accepted_reviewers": accepted_reviewers,
+        "declined_reviewers": declined_reviewers 
     } 
+
     return render(request, 'conference/view_papers.html', context)
 
 
@@ -434,13 +453,36 @@ def edit_reviewer(request, conference_id, paper_id, reviewer_id):
             print(form.errors)
     else:
         form = ReviewerForm(instance=reviewer)
+
+    #####
+    pending_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='pending')
+    accepted_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='accepted')
+    declined_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='declined')
+    
+    pending_reviewers = []
+    accepted_reviewers = []
+    declined_reviewers = []
+
+    for paper_reviewer_pair in pending_paper_reviewer_pairs:
+        pending_reviewers.append(paper_reviewer_pair.reviewer)
+
+    for paper_reviewer_pair in accepted_paper_reviewer_pairs:
+        accepted_reviewers.append(paper_reviewer_pair.reviewer)
+
+    for paper_reviewer_pair in declined_paper_reviewer_pairs:
+        declined_reviewers.append(paper_reviewer_pair.reviewer)
+
     context = {
         'papers': papers,
         'conference': conference,
         'form': form,
         'target_paper': target_paper,
         'display_edit_reviewer_modal': display_edit_reviewer_modal,
-        'reviewer_id': reviewer_id
+        'reviewer_id': reviewer_id,
+
+        'pending_reviewers': pending_reviewers,
+        'accepted_reviewers': accepted_reviewers,
+        'declined_reviewers': declined_reviewers
     }
     return render(request, 'conference/view_papers.html', context)       
 
@@ -485,12 +527,35 @@ def add_new_reviewer(request, conference_id, paper_id):
             print(form.errors)        
     else:
         form = ReviewerForm()
+
+    #####
+    pending_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='pending')
+    accepted_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='accepted')
+    declined_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='declined')
+    
+    pending_reviewers = []
+    accepted_reviewers = []
+    declined_reviewers = []
+
+    for paper_reviewer_pair in pending_paper_reviewer_pairs:
+        pending_reviewers.append(paper_reviewer_pair.reviewer)
+
+    for paper_reviewer_pair in accepted_paper_reviewer_pairs:
+        accepted_reviewers.append(paper_reviewer_pair.reviewer)
+
+    for paper_reviewer_pair in declined_paper_reviewer_pairs:
+        declined_reviewers.append(paper_reviewer_pair.reviewer)
+    
     context = {
         'form': form,
         'paper': paper,
         'papers': papers,
         'display_add_new_reviewer_modal': display_add_new_reviewer_modal,
         'conference': conference,
+
+        'pending_reviewers': pending_reviewers,
+        'accepted_reviewers': accepted_reviewers,
+        'declined_reviewers': declined_reviewers
     }
     return render(request, 'conference/view_papers.html', context)       
 
@@ -555,26 +620,78 @@ def add_reviewer(request, conference_id, paper_id):
         users = User.objects.filter(id__in=id_list)
         formset = UserModelFormset(queryset=users)
 
+    #####
+    pending_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='pending')
+    accepted_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='accepted')
+    declined_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='declined')
+    
+    pending_reviewers = []
+    accepted_reviewers = []
+    declined_reviewers = []
+
+    for paper_reviewer_pair in pending_paper_reviewer_pairs:
+        pending_reviewers.append(paper_reviewer_pair.reviewer)
+
+    for paper_reviewer_pair in accepted_paper_reviewer_pairs:
+        accepted_reviewers.append(paper_reviewer_pair.reviewer)
+
+    for paper_reviewer_pair in declined_paper_reviewer_pairs:
+        declined_reviewers.append(paper_reviewer_pair.reviewer)
+
     context = {
         'formset': formset,
         'paper': paper,
         'papers': papers,
         'display_add_reviewer_modal': display_add_reviewer_modal,
         'conference': conference,
+
+        'pending_reviewers': pending_reviewers,
+        'accepted_reviewers': accepted_reviewers,
+        'declined_reviewers': declined_reviewers
     }
     return render(request, 'conference/view_papers.html', context)
 
 
 def reviewer_info(request, conference_id, paper_id, reviewer_id):
+    paper = Paper.objects.get(id=paper_id)
     papers = Paper.objects.filter(conference=conference_id).order_by('created_at')
     conference = Conference.objects.get(id = conference_id)
     display_reviewer_info_modal = True
     reviewer = Reviewer.objects.get(id=reviewer_id)
+
+    try:
+        review = Review.objects.get(paper=paper, reviewer=reviewer)
+    except:
+        review = None    
+
+    #####
+    pending_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='pending')
+    accepted_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='accepted')
+    declined_paper_reviewer_pairs = Paper_Reviewer.objects.filter(paper__in=papers, status='declined')
+    
+    pending_reviewers = []
+    accepted_reviewers = []
+    declined_reviewers = []
+
+    for paper_reviewer_pair in pending_paper_reviewer_pairs:
+        pending_reviewers.append(paper_reviewer_pair.reviewer)
+
+    for paper_reviewer_pair in accepted_paper_reviewer_pairs:
+        accepted_reviewers.append(paper_reviewer_pair.reviewer)
+
+    for paper_reviewer_pair in declined_paper_reviewer_pairs:
+        declined_reviewers.append(paper_reviewer_pair.reviewer)
+
     context = {
         "papers": papers,
         "conference": conference,
         "display_reviewer_info_modal": display_reviewer_info_modal,
-        "reviewer": reviewer
+        "reviewer": reviewer,
+        "review": review,
+
+        'pending_reviewers': pending_reviewers,
+        'accepted_reviewers': accepted_reviewers,
+        'declined_reviewers': declined_reviewers
     } 
     return render(request, 'conference/view_papers.html', context)
 
