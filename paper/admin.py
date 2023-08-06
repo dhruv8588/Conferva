@@ -26,11 +26,19 @@ class ReviewerAdmin(admin.ModelAdmin):
     list_display = ['first_name', 'last_name', 'user', 'email']
 
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ['paper', 'reviewer', 'body', 'date_reviewed']   
+    list_display = ['paper', 'reviewer', 'date_reviewed']   
 
 class Paper_ReviewerAdmin(admin.ModelAdmin):
     list_display = ['paper', 'reviewer', 'status']
 
+# class OptionAdmin(admin.ModelAdmin):
+#     list_display = ['text']
+
+# class QuestionAdmin(admin.ModelAdmin):
+#     list_display = ['text']
+
+# class AnswerAdmin(admin.ModelAdmin):
+#     list_display = ['text']
 
 admin.site.register(Paper, PaperAdmin)
 admin.site.register(Author, AuthorAdmin)
@@ -38,3 +46,7 @@ admin.site.register(Reviewer, ReviewerAdmin)
 admin.site.register(Paper_Reviewer, Paper_ReviewerAdmin)
 admin.site.register(Keywords, KeywordsAdmin)
 admin.site.register(Review, ReviewAdmin)
+
+# admin.site.register(Option, OptionAdmin)
+# admin.site.register(Question, QuestionAdmin)
+# admin.site.register(Answer, AnswerAdmin)

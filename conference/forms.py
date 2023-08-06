@@ -81,4 +81,3 @@ UserModelFormset = modelformset_factory(
     form = InviteUserForm,
     extra = 0,
 )        
-

@@ -68,5 +68,3 @@ class Conference(models.Model):
                     mail_subject = "We're sorry! Your request for conference creation- " + self.name + "(" + self.acronym + ")" + " has been rejected."
                     send_conference_approval_status_email(mail_subject, self)
         return super(Conference, self).save(*args,)     
-
-

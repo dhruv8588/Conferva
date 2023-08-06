@@ -34,4 +34,3 @@ ResearchAreaFormSet = forms.inlineformset_factory(
     User, ResearchArea, form=ResearchAreaForm,
     extra=1,
 )        
-

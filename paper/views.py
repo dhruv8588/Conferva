@@ -9,7 +9,7 @@ from django.core.exceptions import PermissionDenied
 from accounts.models import User
 from conference.models import Conference
 
-from .forms import AuthorForm, KeywordsFormSet, PaperForm, ReviewForm
+from .forms import AuthorForm, AuthorModelFormset, KeywordsFormSet, PaperForm, ReviewForm
 from .models import Author, Paper, Paper_Reviewer, Review
 
 # Create your views here.
@@ -206,10 +206,17 @@ def submit_paper(request, paper_id=None, conference_id=None, author_id=None):
     if request.method == 'POST':
         form = PaperForm(request.POST, request.FILES, instance=paper)
         formset = KeywordsFormSet(request.POST, prefix='keywords', instance=paper)
-          
+        aformset = AuthorModelFormset(request.POST)
+
+        if aformset.is_valid():    
+            aformset.save()  
+        else:
+            print(aformset.errors)      
+            
         if form.is_valid() and formset.is_valid():
             paper = form.save() 
             
+            # keywords
             for kform in formset:
                 keyword = kform.save(commit=False)
                 if keyword.name != '':
@@ -218,6 +225,10 @@ def submit_paper(request, paper_id=None, conference_id=None, author_id=None):
                 elif keyword.name == '' and kform.instance.id:
                     kform.instance.delete()    
 
+
+
+
+            # is_submitter_author
             is_submitter_author = form.cleaned_data['is_submitter_author']
             if is_submitter_author == True:
                 authors = Author.objects.all()
@@ -300,11 +311,13 @@ def submit_paper(request, paper_id=None, conference_id=None, author_id=None):
     else:
         form = PaperForm(instance=paper)
         formset = KeywordsFormSet(prefix='keywords', instance=paper)
+        aformset = AuthorModelFormset(queryset=Author.objects.filter(paper=paper))
     context = {
         "form": form,
         "conference_id": conference_id,
         "paper": paper,
-        "formset": formset
+        "formset": formset,
+        "aformset": aformset
     }
     if url_name == 'submit_paper':
         return render(request, 'paper/submit_paper.html', context)
